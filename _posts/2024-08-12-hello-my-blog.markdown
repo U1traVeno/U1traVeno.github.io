@@ -1,7 +1,7 @@
 ---
 layout:     post
-title:      "Hello my blog!"
-subtitle:   "Hello my blog's subtitle"
+title:      "Hello, my blog!"
+subtitle:   " \"Hello World, Hello Blog\""
 date:       2024-08-12
 author:     "U1traVeno"
 header-img: "img/tag-bg.jpg"
