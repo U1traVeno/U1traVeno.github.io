@@ -2,7 +2,7 @@
 layout:     post
 title:      "Hello my blog!"
 subtitle:   "Hello my blog's subtitle"
-date:       2024-8-12 
+date:       2024-08-12
 author:     "U1traVeno"
 header-img: "img/tag-bg.jpg"
 tags:
@@ -18,5 +18,9 @@ tags:
 
 博客还在施工中，一堆东西都要自己自定义。还留着很多Hux大佬的个人的博客内容，放到自己的博客上怪尴尬的。比如About界面还得改成自己的。  
 
-posts的文件名必须是小写  
-好像还是不行，我试试把.md改成.markdown
+然而发现自己的博客上传不了，折腾了很久试错
+
+- posts的文件名必须是小写吗？
+- 好像还是不行，我试试把.md改成.markdown？
+
+最后发现是日期的问题。月份必须要两位。比如`2024-08-12`. 实际上不需要非把文件名全部改成小写，也不需要改成.markdown。
