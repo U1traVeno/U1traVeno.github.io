@@ -1,10 +1,12 @@
 ---
 layout:     post
-title:      Hello my blog!
-subtitle:   Hello my blog's subtitle
+title:      "Hello my blog!"
+subtitle:   "Hello my blog's subtitle"
 date:       2024-8-12 
-author:     U1traVeno
-header-img: img/tag-bg.jpg
+author:     "U1traVeno"
+header-img: "img/tag-bg.jpg"
+tags:
+    - 随笔
 ---
 
 ## Hello My blog
