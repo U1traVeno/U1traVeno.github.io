@@ -2,7 +2,7 @@
 layout:     post
 title:      "Hello, my blog!"
 subtitle:   " \"Hello World, Hello Blog\""
-date:       2024-08-12 07:59:00
+date:       2024-08-12
 author:     "U1traVeno"
 header-img: "img/tag-bg.jpg"
 tags:
