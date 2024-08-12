@@ -4,6 +4,7 @@ title:      "Datawhale AI夏令营 第四期方向二笔记"
 subtitle:   "与大项目的第一次接触"
 author:     "U1traVeno"
 date:       2024-08-12 17:19:00
+header-img: "img/tag-bg.jpg"
 tags:
     - Datawhale
     - AI
