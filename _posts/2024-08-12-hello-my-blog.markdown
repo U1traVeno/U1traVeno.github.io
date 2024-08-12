@@ -3,7 +3,7 @@ layout:     post
 title:      "Hello, my blog!"
 subtitle:   " \"Hello World, Hello Blog\""
 date:       2024-08-12
-# author:     "U1traVeno"
+author:     "U1traVeno"
 header-img: "img/tag-bg.jpg"
 tags:
     - 随笔
@@ -29,3 +29,5 @@ tags:
 - 文件名不含大写
 - 后缀必须为.markdown
 - 日期月份和日必须两位数字
+
+2024-08-12-11:54 刚才把另一篇文章的作者改掉之后莫名其妙的这篇终于能上传成功了。难道博客的作者在这个项目里面会构成奇怪的关联？
