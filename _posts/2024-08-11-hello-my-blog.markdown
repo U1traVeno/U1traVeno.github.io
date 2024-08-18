@@ -2,7 +2,7 @@
 layout:     post
 title:      "Hello, my blog!"
 subtitle:   " \"Hello World, Hello Blog\""
-date:       2024-08-12
+date:       2024-08-11
 author:     "U1traVeno"
 header-img: "img/tag-bg.jpg"
 tags:
@@ -26,8 +26,11 @@ tags:
 好像还是不行，我试试把.md改成.markdown？
 
 最后发现是日期的问题.  
-- 文件名不含大写
+- ~~文件名不含大写~~
 - 后缀必须为.markdown
 - 日期月份和日必须两位数字
 
 2024-08-12-11:54 刚才把另一篇文章的作者改掉之后莫名其妙的这篇终于能上传成功了。难道博客的作者在这个项目里面会构成奇怪的关联？
+
+2024-08-14 今天上传了配置anaconda的那篇，我文件名既含大写又有中文，因此把上面的不含大写划掉了。  
+究竟为什么前天一直上传不成功，一直是个谜。

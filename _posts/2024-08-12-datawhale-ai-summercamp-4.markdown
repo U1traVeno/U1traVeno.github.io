@@ -2,9 +2,8 @@
 layout:     post
 title:      "Datawhale AI夏令营 第四期方向二笔记"
 subtitle:   "与大项目的第一次接触"
-date:       2024-08-12 7:19:00
+date:       2024-08-12
 author:     "U1traVeno"
-header-img: "img/tag-bg.jpg"
 tags:
     - Datawhale
     - AI
