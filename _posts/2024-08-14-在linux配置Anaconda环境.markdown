@@ -6,6 +6,7 @@ date:       2024-08-14
 author:     "U1traVeno"
 header-img: "img/tag-bg.jpg"
 tags:
+    - Linux
     - Python
 ---
 
