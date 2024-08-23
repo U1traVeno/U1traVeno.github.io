@@ -46,3 +46,22 @@ Please use the HTTP header field that identifies the address of the web page, fr
 但是不行。响应头除了时间是一样的。
 
 这里还有一个不知道为啥的问题，有时候像上面这样加了一个字段之后，点击不了下面的发送。后来发现因为要想让它识别为链接必须在前面加上https://之类的。
+
+## How to use developer tools (100pt)
+
+打开F12, 发现html里面给这些按钮加上了`onclick="return False"`。把这些改掉就可以跳转了。
+
+![html](/img/in-post/2024-08-23-4.png)
+
+根据提示来到182.xx.xx.xx:xxxxx/L00kAtME.php
+
+![L00kAtME](/img/in-post/2024-08-23-5.png)
+
+`disabled="disabled"`?? 删！
+
+![删](/img/in-post/2024-08-23-6.png)
+
+这里只拿到一部分flag。另一部分在f12网络模块GET到的一个包里面的消息头。
+
+f12有用捏
+
