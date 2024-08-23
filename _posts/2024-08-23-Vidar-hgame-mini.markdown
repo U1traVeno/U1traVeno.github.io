@@ -37,11 +37,11 @@ Please use the HTTP header field that identifies the address of the web page, fr
 
 在 [Web安全学习笔记](https://websec.readthedocs.io/zh/latest/) 里面找到了这个
 
-![Referer请求头](/img/in-post/2024-08-23-1.png)
+![Referer请求头](/img/in-post/2024-08-23-2.png)
 
 于是我试着把刚刚接收到的http请求加上这个字段重发一下
 
-![加上字段](/img/in-post/2024-08-23-1.png)
+![加上字段](/img/in-post/2024-08-23-3.png)
 
 但是不行。响应头除了时间是一样的。
 
