@@ -25,7 +25,7 @@ tags:
 
 了解了一下http请求是怎么构成的。
 
-[http消息结构 | runoob](https://www.runoob.com/http/http-messages.html)
+[http消息结构 (runoob)](https://www.runoob.com/http/http-messages.html)
 
 打开F12, 刷新靶机网站，定睛一看，响应头里有个Hint
 
