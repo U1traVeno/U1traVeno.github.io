@@ -29,7 +29,7 @@ tags:
 
 打开F12, 刷新靶机网站，定睛一看，响应头里有个Hint
 
-![Hint](./post_img/2024-08-23-1.png)
+![Hint](../post_img/2024-08-23-1.png)
 
 Please use the HTTP header field that identifies the address of the web page, from which the resource has been requested.
 
@@ -37,11 +37,11 @@ Please use the HTTP header field that identifies the address of the web page, fr
 
 在 [Web安全学习笔记](https://websec.readthedocs.io/zh/latest/) 里面找到了这个
 
-![Referer请求头](./post_img/2024-08-23-2.png)
+![Referer请求头](../post_img/2024-08-23-2.png)
 
 于是我试着把刚刚接收到的http请求加上这个字段重发一下
 
-![加上字段](./post_img/2024-08-23-3.png)
+![加上字段](../post_img/2024-08-23-3.png)
 
 但是不行。响应头除了时间是一样的。
 
