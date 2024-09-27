@@ -346,17 +346,154 @@ Vidar-Team has 3 books called id,name,number,fl4g
 >>> 0' union select 1, fl4g, 3 from secret;%23
 
 Vidar-Team has 3 books called VIDAR{1t_1s_4_f4k3_fl4g}
-```
+``` 
 ## Book Management System V2(200pt)
+其实这题只是上一个题目简单的加上一点字符串的过滤, 挺无聊的.
+
+大概应该是这样实现的:
+```go
+func Waf(code string) bool {
+    fmt.Println(code)
+    blacklist := []string{"select", "SELECT", "from", "FROM", "where", "WHERE", "union", "UNION", "or", "OR", "and", "AND", "+", "-", "=", "database()"}
+    for _, s := range blacklist {
+        if strings.Contains(code, s) {
+            return false
+        }
+    }
+    return true
+}
+```
+如果出现了上述字符串, 就会说
+> 哼!就这水平还想拿flag？
+
+简单的大小写绕过就行, 我猜没有人真的会这样防御sqli
 
 ## 呜呜呜我要学英语(200pt)
+本题让人了解如何用python编写发包脚本. 利用Requests模块.
+
+简单的直接从runoob上看看requests模块怎么用就可以了. http消息体怎么构造可以去随便抓个包看看啥样子.  对于要往哪个路由发请求, 完全可以通过阅读页面源代码来得知. 往`/question`发个GET会得到所有的题目信息, 往`/api/answer`POST答题, 往`/api/score`POST获取分数, 分数够了之后往`/api/ok`发包即可. 
+
+为了保留住cookies, 我们需要新建一个`requests.Session`对象, 它会自动处理cookies.
+
+需要注意的是, 对于一个request类, 用text方法获取到的消息体, 是字符串格式的. 这里需要用python的`json`库将这个字符串变成json格式的python字典
+```python
+question_list_text = requests.get(url+"/questions").text # 这是字符串
+print(len(question_list_text)) # 95654
+question_list = json.loads(question_list_text) # 这是嵌套列表的字典
+print(len(question_list))  # 600
+```
+题目的本意是让人获取到这个题库的答案列表之后, 批量对每一个题目发送对应的答案, 但是大家似乎都没这么做
+
+大家的做法:
+1. 调用翻译接口, 找相似度最高的
+2. abcd每个选项都试一次, 因为服务器会告诉你`{"correct":"true"}`.
+3. 把问题全抛给GPT, 然后自己点. 
+
+我其实是走的第二个路线, 但因为写了个死循环产生了第四个路线: 只答第一题, 因为只会答第一题.
+```python
+# Post Answer
+"""
+这里其实写错了
+while True没加break,结果重复答第一题,但是分数一直在加.
+最后直接获取flag了
+应该在try语句末尾加break的
+"""
+# answer_list = ['B','这里本来应该是另外599个答案']
+hack_s = requests.Session()
+hack_s.get(url=url)
+print(f"answer_list:{answer_list}")
+for question_index in range(0,600):
+    while True:
+        try:
+            answer_post_json = {"questionIndex":question_index,"selectedAnswer":answer_list[question_index]}
+            print(f"Posting quesion{question_index}. Answer:{answer_list[question_index]}", end=' ')
+            answer_response_post = hack_s.post(url=url+"/api/answer", json=answer_post_json, timeout=3)
+            print("Success!")
+            # 可以看到这里忘了加 break
+        except requests.exceptions.Timeout:
+            print("Timeout. Retrying.")
+    while True:
+        try:
+            print("Getting current score.", end=' ')
+            score_response_post = hack_s.post(url=url+"/api/score", timeout=3)
+            print("Success!")
+            current_score = json.loads(score_response_post.text)['score']
+            print(f"Current score:{current_score}")
+            # 可以看到这里也忘了加 break
+        except requests.exceptions.Timeout: 
+            print("Timeout. Retrying.")
+
+```
+输出是这样的
+```
+
+answer_list:['B', '这里本来是另外599个答案']
+Posting quesion0. Answer:B Success!
+Getting current score. Success!
+Current score:1
+Posting quesion0. Answer:B Success!
+Getting current score. Success!
+Current score:2
+Posting quesion0. Answer:B Success!
+Getting current score. Success!
+Current score:3
+Posting quesion0. Answer:B Success!
+Getting current score. Success!
+Current score:4
+Posting quesion0. Answer:B Success!
+Getting current score. Success!
+Current score:5
+Posting quesion0. Answer:B Success!
+Getting current score. Success!
+Current score:6
+...
+KeyboardInterrupt
+
+```
+于是再用这个`hack_s`往`/api/ok`发个请求就拿到flag了.
 
 ## Go Ahead(200pt)
+本题考察[Go SSTI(Golang Server Side Template Injection)](https://exploit-notes.hdks.org/exploit/web/go-ssti/)
 
+仔细阅读模板的源码(gin.Context), GET的时候传个tmpl的参数, 就能让服务器返回它看到的请求, 可以看到flag. 题目的提示很明显了.
+
+Go SSTI比较没啥用
 ## Vidar-Mail(200pt)
+本题实际上想考察利用SQL约束攻击来获取管理员账户权限, 但我因为发现源码中有这样的东西:
+```go
+func login(c *gin.Context) {
+    
+    ...
 
+	query := "SELECT username FROM users WHERE username = '" + user.Username + "' AND password = '" + user.Password + "'"
 
+	err = db.QueryRow(query).Scan(&username)
 
+	if err != nil && err != sql.ErrNoRows {
+		c.JSON(500, gin.H{"error": "Internal server error"})
+		fmt.Println(err)
+		return
+	}
+
+	if username == "" {
+		c.JSON(400, gin.H{"error": "Invalid username or password"})
+		return
+	}
+	role := "user"
+	if strings.Trim(username, " ") == "admin" {
+		role = "admin"
+	}
+	
+    ...
+
+```
+竟然直接拼接字符串吗? 那只好把你狠狠地注入了~   
+![092701](/img/in-post/2024-09-27-1.png)
+后面看看源码让自己干啥就行
+
+其实普通用户也能控制邮件发出人是谁, 根本不是只读. 抓取一下发邮件的包就知道了.
+
+    
 
 
  
