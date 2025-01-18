@@ -1,0 +1,85 @@
+baseURL: https://v3n0.top/
+languageCode: zh-cn
+title: Veno's blog
+theme: ["PaperMod"]
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON # necessary for search
+
+menu:
+  main:
+
+    - identifier: search
+      name: Search
+      url: search
+      weight: 4
+    
+    - identifier: archive
+      name: Archive
+      url: archives
+      weight: 3
+
+    - identifier: tags
+      name: Tags
+      url: tags
+      weight: 2
+    
+    - identifier: about
+      name: About
+      url: about
+      weight: 1
+
+    - identifier: blogroll
+      name: Blogroll
+      url: blogroll
+      weight: 5
+
+
+params:
+  homeInfoParams:
+    Title: Veno的博客
+    Content: 记自己想记的
+
+  socialIcons: # optional
+    - name: "github"
+      url: "https://github.com/U1traVeno"
+    - name: "bilibili"
+      url: "https://space.bilibili.com/199795377"
+
+  ShowCodeCopyButtons: true
+
+    # 搜索
+
+  fuseOpts:
+
+      isCaseSensitive: false # 是否大小写敏感
+
+      shouldSort: true # 是否排序
+
+      location: 0
+
+      distance: 1000
+
+      threshold: 0.4
+
+      minMatchCharLength: 0
+
+      # limit: 10 # refer: https://www.fusejs.io/api/methods.html#search
+
+      keys: ["title", "permalink", "summary", "content"]
+
+      includeMatches: true
+
+enableInlineShortcodes: true # shortcode，类似于模板变量，可以在写 markdown 的时候便捷地插入，官方文档中有一个视频讲的很通俗
+hasCJKLanguage: true # 是否有 CJK 的字符
+enableRobotsTXT: true # 允许生成 robots.txt
+buildDrafts: false # 构建时是否包括草稿
+buildFuture: false # 构建未来发布的内容
+buildExpired: false # 构建过期的内容
+enableEmoji: true # 允许 emoji
+pygmentsUseClasses: true
+defaultContentLanguage: zh # 顶部首先展示的语言界面
+defaultContentLanguageInSubdir: false # 是否要在地址栏加上默认的语言代码
