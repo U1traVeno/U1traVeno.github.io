@@ -78,12 +78,33 @@ IPv4/IPv6 双栈 为 Pod（容器组）和 Service（服务）分配 IPv4 和 IP
 每一个节点上都运行着一个kubelet，它可以保证各个节点间的通信，在Pod上运行一些东西。
 
 ### 控制平面(Control Plane)
-[**控制平面**](https://kubernetes.io/zh-cn/docs/concepts/overview/components/#control-plane-components)只运行一些k8s所必要的进程，主要有四个：API Server，Controller Manager, Scheduler，etcd。
+[**控制平面**](https://kubernetes.io/zh-cn/docs/concepts/overview/components/#control-plane-components)只运行一些k8s所必要的进程，主要有四个：API Server，Controller Manager, Scheduler，etcd。控制平面一般会有多个节点来保证可用性，我们叫这些节点 Master Node。下面简略讲讲控制平面主要的四个组件。
 
-API Server也是个容器，它公开了Kubernetes API，可以理解为每个cluster的入口，负责接收处理请求。
+**API Server**，它也是个容器，它公开了 Kubernetes API，可以理解为每个 cluster 的入口，负责接收处理请求。
 
-Controller Manager 接收整个集群的运行信息，比如什么东西需要维修，或者什么容器挂了要重启之类的。
+**Controller Manager**，接收整个集群的运行信息，比如什么东西需要维修，或者什么容器挂了要重启之类的。
 
-Scheduler 负责根据各个Node的工作负载，剩余资源，把新的Pod分配给不同的Node。
+**Scheduler**，负责根据各个 Node 的工作负载，剩余资源，把新的Pod分配给不同的Node。
 
-etcd，一致且高可用的键值存储，用作 Kubernetes 所有集群数据的后台数据库，里面存着各种配置文件数据、每个节点各个时间的状态数据，这就相当于存了很多快照，k8s的回滚就是依赖于它。etcd 这个名字听着很抽象。etcd 发音为/ˈɛtsiːdiː/，意思是“distributed `etc` directory”，分布式配置文件目录。我们知道linux中`/etc`目录一般存一些系统和应用程序的配置文件，etcd就是分布式的`/etc`。
+**etcd**，一致且高可用的键值存储，用作 Kubernetes 所有集群数据的后台数据库，里面存着各种配置文件数据、每个节点各个时间的状态数据，这就相当于存了很多快照，k8s的回滚就是依赖于它。etcd 这个名字听着很抽象。etcd 发音为/ˈɛtsiːdiː/，意思是“distributed `etc` directory”，分布式配置文件目录。我们知道linux中`/etc`目录一般存一些系统和应用程序的配置文件，etcd就是分布式的`/etc`。
+
+### Node and Pod
+
+k8s中的工作机器称为节点(node)。Pod 是集群上一组运行的容器，是 k8s 最小的抽象单元。
+
+我们不能简单的把它们理解为 Pod 构成了 Node, Node 中包含 Pod 。准确来说它们的关系是运行与承载。Node 是硬件或资源的实体，Pod 是运行在这个实体上的工作负载。换句话说，Node 承载了 Pod，而不是 Pod 组成了 Node。
+
+Pod 中可以运行多个容器。但最佳实践一般是每一个 pod 只跑一个容器。如果多容器，也应该是：一个主要应用容器，还有一些辅助容器，或者什么必须得跑在那个 pod 里的服务。
+
+### Service and Ingress
+
+每个 Pod 都有一个内部IP地址。那么如果Pod挂了重启，我们怎么保证其他的 Pod 还能迅速获取到新的IP呢？ 
+
+K8s引入了 [**Service**](https://kubernetes.io/zh-cn/docs/concepts/services-networking/service/#services-in-kubernetes) 的抽象层，这就可以为Pod提供了稳定的访问入口。可以简单的理解为，Service给一组Pod提供了一个稳定的虚拟IP(ClusterIP)，它只在集群内部使用的地址可以分配给每一个Pod。比如说Service和Pod的生命周期不同步。也就是说，即使Pod死了，下一个Pod仍然可以从同一个Service获取同样的地址。
+
+Service是一个集群内部的IP地址。而[**Ingress**](https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress/)所做的事情是为Service提供可以从集群外部访问的路由规则和入口（域名，路径，HTTP）。它通过 [**Ingress Controller**](https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress-controllers/) 实现。
+
+准确的说，Service并不是不能提供外部访问。可以开一个固定的NodePort。但显然这样不灵活。
+
+### ConfigMap and Secret
+
