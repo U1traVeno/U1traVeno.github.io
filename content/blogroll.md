@@ -15,7 +15,7 @@ url: /blogroll/
 - **[飞鸟记](https://blog.aflybird.cn)**
 - **[NX の 博客](https://nickxu.me)**
 - **[司沐小记](https://blog.simuoss.cn/)**
-- **[Sakana's Blog](https://sakablog.top)**
+- **[Sakana's Blog](http://sakablog.top)**
 
 
 
