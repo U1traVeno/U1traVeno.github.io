@@ -1,0 +1,30 @@
+{{ define "main" }}
+<main class="main">
+    <div class="page-header">
+        <h1>{{ .Title }}</h1>
+        {{ if .Description }}
+        <div class="page-description">{{ .Description }}</div>
+        {{ end }}
+    </div>
+
+    <div class="content">
+        {{ .Content }}
+    </div>
+
+    <div class="links-grid">
+        {{ range .Site.Data.blogroll }}
+        <a href="{{ .url }}" target="_blank" rel="noopener noreferrer" class="link-card">
+            <div class="link-card-container">
+                {{ if .avatar }}
+                <img src="{{ .avatar }}" alt="{{ .name }}'s avatar" class="link-avatar">
+                {{ end }}
+                <div class="link-info">
+                    <h3 class="link-name">{{ .name }}</h3>
+                    <p class="link-description">{{ .description }}</p>
+                </div>
+            </div>
+        </a>
+        {{ end }}
+    </div>
+</main>
+{{ end }}

@@ -1,0 +1,60 @@
+/* 友情链接卡片网格布局 */
+.links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* 链接卡片基础样式 */
+.link-card {
+    display: block;
+    color: var(--content);
+    background-color: var(--card-background);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    text-decoration: none !important; /* 强制去除下划线 */
+    border: 1px solid var(--border);
+    height: 100%;
+}
+
+.link-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.link-card-container {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+}
+
+/* 头像样式 */
+.link-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* 链接信息样式 */
+.link-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.link-name {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--primary); /* 使用主题的主色调 */
+}
+
+.link-description {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--secondary); /* 使用主题的次要文字颜色 */
+}

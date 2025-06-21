@@ -1,0 +1,24 @@
+- name: "HDU-CS-Wiki"
+  url: "https://hdu-cs.wiki"
+  avatar: "https://cdn.xyxsw.site/hdu-cs-wiki%20full.svg"
+  description: "HDU计算机科学讲义"
+
+- name: "飞鸟记"
+  url: "https://blog.aflybird.cn"
+  avatar: "https://avatars.githubusercontent.com/u/36830265"
+  description: "爱飞的鸟的个人博客"
+
+- name: "NX の 博客"
+  url: "https://nickxu.me"
+  avatar: "https://nickxu.me/static/favicon.jpg"
+  description: "NX 的个人博客"
+
+- name: "司沐小记"
+  url: "https://blog.simuoss.cn/"
+  avatar: "https://avatars.githubusercontent.com/u/68797503?v=4"
+  description: "司沐的个人博客"
+
+- name: "Sakana's Blog"
+  url: "http://sakablog.top"
+  avatar: "https://sakablog.top/upload/8ff3da318b92a5c64778393e3eb5f52.jpg"
+  description: "Sakana 的个人博客"
