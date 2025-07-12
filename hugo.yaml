@@ -74,6 +74,7 @@ params:
       includeMatches: true
   
   giscus:
+    enable: true
     repo: "U1traVeno/U1traVeno.github.io"
     repoId: "R_kgDONsVpmg"
     category: "Blog Comments"
