@@ -72,6 +72,21 @@ params:
       keys: ["title", "permalink", "summary", "content"]
 
       includeMatches: true
+  
+  giscus:
+    repo: "U1traVeno/U1traVeno.github.io"
+    repoId: "R_kgDONsVpmg"
+    category: "Blog Comments"
+    categoryId: "DIC_kwDONsVpms4Cs2Mk"
+    mapping: "pathname"
+    strict: "0"
+    reactionsEnabled: "1"            
+    emitMetadata: "0"                
+    inputPosition: "top"             
+    theme: "preferred_color_scheme"  
+    lang: "zh-CN"                    
+    loading: "lazy"
+    crossorigin: "anonymous"
 
 enableInlineShortcodes: true # shortcode，类似于模板变量，可以在写 markdown 的时候便捷地插入，官方文档中有一个视频讲的很通俗
 hasCJKLanguage: true # 是否有 CJK 的字符
