@@ -3,6 +3,7 @@ date: '2025-07-13T14:18:18+08:00'
 draft: false
 title: 'HDU-CSWiki后端开发入门教程的教学大纲设想'
 comments: true
+tags: ['HDU-CS-Wiki', '后端', '随笔']
 ---
 
 需要给[HDU-CSwiki](https://hdu-cs.wiki)写后端入门教程了, 在这里罗列一下自己的想法.
