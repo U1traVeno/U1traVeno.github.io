@@ -119,6 +119,7 @@ class DatabaseSessionManager:
 sessionmanager: Optional[DatabaseSessionManager] = None
 
 # main.py
+import app.router
 import app.session as session_module
 
 @asynccontextmanager
@@ -135,6 +136,8 @@ async def lifespan(app: FastAPI):
     # 现在，应用的任何其他部分都可以安全地使用 sessionmanager 了
     await db_manager.check_database_health()
 
+    logger.info("DatabaseSessionManager initialized successfully")
+
     yield
     
     # ... 清理工作 ...
@@ -143,14 +146,44 @@ async def lifespan(app: FastAPI):
 from app.session import sessionmanager
 from repositories.user import UserRepository
 
-# 可以将 repo 也提升为模块级实例，因为它现在是无状态的
-user_repo = UserRepository(sessionmanager)
-
 def get_user_repo() -> UserRepository:
-    return user_repo
+    if sessionmanager is None: 
+        raise HTTPException(
+            status_code=500, 
+            detail="数据库会话管理器未初始化"
+        )
+    return UserRepository(sessionmanager)
 
 ```
 
-这样修复之后, 应用受到的高并发请求不会因为连接溢出而立刻崩溃, 而是让请求排队等待数据库响应. 
+但现在发现, 应用启动的时候, logger成功显示initialized, 然而接到请求发现 repo 收到的 `sessionmanager` 是None. 这又是一个小坑, 是Python的 `from ... import ...` 机制导致的. 
 
+我们捋一遍上面代码:
 
+1. Python 开始加载 main.py
+2. main.py 加载了 `router`
+3. `router` 导入了各个API路由文件
+4. API路由文件又导入了 `deps.py`
+5. deps执行了 `from app.session import sessionmanager` ! 而这时, main.py 中的lifespan还未加载, deps.py 从 `app.session` 模块获取到了 `sessionmanager` 的当前值, 在自己的模块命名空间里创建了一个名为 `sessionmanager` 的变量, 并让它指向 None.
+6. lifespan执行, 创建了 `DatabaseSessionManager` 的实例, 更新了 `app.session` 的全局变量
+7. API请求到达, FastAPI 解析依赖, `get_user_repository()` 位于 `deps.py`, 它使用的仍然是 deps 内部的 `sessionmanager`, 也就是 `None` !
+
+简单来说, `from ... import ...` 导入的是一个值 (或者说对象的引用), 而不是一个实时链接. 后续对原始模块中的变量的重新赋值, 不会影响到已经导入这个值的其他模块. 
+
+正确做法是导入模块, 而不是导入变量. 
+
+```python 
+
+# deps.py
+import app.session as session_module
+from repositories.user import UserRepository
+
+def get_user_repo() -> UserRepository:
+    if session_module.sessionmanager is None: 
+        raise HTTPException(
+            status_code=500, 
+            detail="数据库会话管理器未初始化"
+        )
+    return UserRepository(sessionmanager)
+
+```
