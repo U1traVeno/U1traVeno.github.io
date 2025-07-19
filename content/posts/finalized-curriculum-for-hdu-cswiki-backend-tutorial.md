@@ -9,7 +9,7 @@ comments: true
 暂时定稿为此版本. 八月份会开始以此为基础编写后端教程. 欢迎各种的建议批评, 以及各种的帮忙协作. 
 
 ### Before Beginning
-- 前置知识需求: CS61A, 畅通的网络环境, 了解Python的基础写法, 基本的英语阅读能力, 提问的艺术, 基础CLI操作
+- 前置知识需求: CS61A, 或掌握至少一门编程语言（如Python）的扎实基础，理解函数、类、数据结构（列表、字典、集合等）、递归等核心编程概念, 畅通的网络环境, 了解Python的基础写法, 基本的英语阅读能力, 提问的艺术, 基础CLI操作
 
 - ### Lab 0:
   - VSCode 配置, [环境变量, Python 虚拟环境, PEP规范和类型标注](https://fastapi.tiangolo.com/zh/python-types/)
@@ -26,6 +26,7 @@ comments: true
     - 文档阅读: FastAPI 有着非常用户友好的文档, 利用它来培养阅读文档的习惯. 这也是本教程选择SQLModel而不是SQLAlchemy的原因之一
     - 正确使用AI: 不要让Copilot变成Copybot
     - 教学要点: 把自己同样当作学生, 对于一切实际的代码写法, 我们都需要示范如何通过查阅框架文档来得知
+    - 整个教程的每个模块会维护和精进同一个项目(不与 Project 1 相同, 教程项目更倾向于教学示范)
     - 理解或掌握以下知识：
         1. 路由函数 (Routing) 与 HTTP 方法 (GET, POST, PUT, DELETE)。
         2. SQL, ORM 与数据库操作 (CRUD)。
@@ -117,6 +118,10 @@ comments: true
           - ...
     - ### Project 1: 电子书商城
       - 与前端组协调, 后端小组与前端小组共同完成电子书商城项目. 
+      - 要求: 
+        - 强制使用 Feature Branch 工作流
+        - 编写有意义的 Commit Message
+        - 团队成员之间需要进行 Code Review
 
 ### 第二部分： 后端进阶 (Go + Gin)
 
@@ -140,6 +145,7 @@ comments: true
       - 拓展阅读: 
         - gin-swagger
         - 大厂基于Gin的框架
+        - GORM
 
     - ### 模块二： 再论架构与中间件的本质
       - 通过接口和构造函数手动注入依赖, 本质上为了解决相同的问题
@@ -182,7 +188,7 @@ comments: true
       - RPC概念, 以及RPC的底层本质
       - gRPC: Protobuf, 服务定义, 四种通信模式, 在Go中的实践
       - 作业:
-        - ...
+        - 创建两个微服务：user-service 和 order-service。order-service 在创建订单时，需要通过 gRPC 调用 user-service 来验证用户信息是否存在
         
     - ### 模块六：Kubernetes
       - 什么是容器编排? 为什么已经有compose了还需要k8s? 
