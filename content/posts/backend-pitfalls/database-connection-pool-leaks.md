@@ -1,9 +1,9 @@
 ---
 date: '2025-07-17T19:20:01+08:00'
 draft: false
-title: '后端踩坑-数据库连接池泄漏, 单例模式和依赖注入'
+title: '后端踩坑 - 数据库连接池泄漏, 单例模式和依赖注入'
 comments: true
-tags: ['后端', '数据库', 'Python', '设计模式']
+tags: ['后端', '后端踩坑', '数据库', 'Python', '设计模式']
 ---
 
 在写一个 FastAPI + SQLAlchemy 的项目, 写出来个有点蠢的bug, 记一下. 
