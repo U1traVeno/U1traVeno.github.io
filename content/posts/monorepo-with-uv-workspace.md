@@ -110,16 +110,16 @@ Installed 2 packages in 2ms
 14 directories, 14 files
 ```
 
-pyproject.toml 中的内容较多，这里就不贴了，读者可以自己在电脑上一下便知。
+pyproject.toml 中的内容较多，这里就不贴了，读者可以自己在电脑上试一下便知。
 
-如果希望工作区不包含seeds, 则需要在根项目，也就是`albatross`包的pyproject.toml中编辑 `[tool.uv.workspace]`, 添加`exclude = ["packages/seeds"]`。
+如果希望工作区不包含 seeds , 则需要在根项目，也就是`albatross`包的pyproject.toml中编辑 `[tool.uv.workspace]`, 添加`exclude = ["packages/seeds"]`。
 
-> Every workspace needs a root, which is also a workspace member. In the above example, `albatross` is the workspace root, and the workspace members include all projects under the packages directory, ~~except `seeds`~~.
+> Every workspace needs a root, which is also a workspace member. In the above example, `albatross` is the workspace root, and the workspace members include all projects under the packages directory, except `seeds`.
 
 这里 uv 的官方文档给出的例子是 Monorepo 中有一个根项目和几个辅助库。由于每一个工作区都需要一个根，如果我们想创建的 Monorepo 中，各个项目之间的地位是等价的，那么我们需要注意的是我们仍然需要先初始化整个 Monorepo 的根。
 
 ```shell
-
+# 首先初始化根项目
 ❯ uv init --bare  # 使用--bare参数，仅生成一个pyproject.toml文件
 Initialized project `monorepo`
 
