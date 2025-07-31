@@ -12,7 +12,7 @@ comments: true
 
 pip + pyproject.toml 不可能实现声明式的 Monorepo 搭建。不过2025年了，大多数人都更喜欢用 uv, poetry, pdm 之类的现代Python包和项目管理器。我倾向于使用uv。
 
-uv 提供了 `workspace` 功能，可以声明式地在 Pyproject.toml 中定义这样的 Monorepo ，我认为大多数时候已经足够好用。
+uv 提供了 `workspace` 功能，和 Rust 的 Cargo 十分相似，因为 uv 本身就很受 Cargo 启发。通过这个功能，我们可以声明式地在 Pyproject.toml 中定义上面所说的 Monorepo ，我认为大多数时候已经足够好用。
 
 uv 关于 workspace 的文档中有一个例子，但只给出了 pyproject.toml 的内容。其实大多数时候我们是不用手动编辑 pyproject.toml 中关于 `[tool.uv]` 的内容的，因为默认情况下，在现有包内运行 `uv init` 将将新创建的成员添加到工作区，如果工作区根目录中不存在 `[tool.uv.workspace]` 表格，则会创建一个。下面展示仅使用 uv 指令实现官方文档示例的仓库框架的搭建。
 
@@ -164,5 +164,9 @@ members = [
 8 directories, 7 files
 
 ```
+
+附： 
+
+[UV Documentation - Using workspaces](https://docs.astral.sh/uv/concepts/projects/workspaces/)
 
 
