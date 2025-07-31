@@ -1,13 +1,13 @@
 ---
 date: '2025-07-20T00:21:21+08:00'
 draft: false
-title: 'HDU-CSWiki后端教程大纲'
+title: '[HDU-CS-Wiki 后端教程] 大纲'
 tags: ['HDU-CS-Wiki', '后端']
 comments: true
 ---
 
 ### Before Beginning
-- 前置知识需求: CS61A, 或掌握至少一门编程语言（如Python）的扎实基础，理解函数、类、数据结构（列表、字典、集合等）、递归等核心编程概念, 畅通的网络环境, 了解Python的基础写法, 基本的英语阅读能力, 提问的艺术, 基础CLI操作
+- 前置知识需求: CS61A, 或掌握至少一门编程语言（如Python）的扎实基础，理解函数、类、简单数据结构（列表、字典、集合等）、递归等核心编程概念, 畅通的网络环境, 了解Python的基础写法, 基本的英语阅读能力, 提问的艺术, 基础CLI操作
 
 - ### Lab 0:
   - VSCode 配置, [环境变量, Python 虚拟环境, PEP规范和类型标注](https://fastapi.tiangolo.com/zh/python-types/)
@@ -167,6 +167,7 @@ comments: true
       - 拓展阅读:
         - 死信队列
         - Kafka核心概念: Topic, Partition, Offset, Consumer Group
+        - RocketMQ
   
     - ### 模块四: 缓存
       - Redis
