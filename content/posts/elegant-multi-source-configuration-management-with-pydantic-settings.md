@@ -12,7 +12,7 @@ comments: true
 
 下面直接给出代码示例。
 
-```python 
+```python
 # config.py
 
 import os
@@ -181,6 +181,7 @@ if __name__ == "__main__":
 如果我们希望删除某个配置源，那么我们可以从返回的元组中剔除它（如本例的`env_settings`）。
 
 要导入新的配置源，同样也可以在返回的元组中添加它们。本例添加了 `TomlConfigFileSettingsSource`，`YamlConfigFileSettingsSource`。它们会从`Settings`类的`model_config`中的`toml_file`等变量获取配置文件位置。例如这里会获取运行根目录下的`myapp.toml`。
+
 ```python
 # pydantic_settings/sources/providers/toml.py
 class TomlConfigSettingsSource(InitSettingsSource, ConfigFileSourceMixin):

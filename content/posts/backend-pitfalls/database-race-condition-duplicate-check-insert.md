@@ -96,11 +96,11 @@ class MyService:
         return MyModelResponse.from_orm(result)
 ```
 
-在串行状态时, 这样是没有什么问题的. 但很多时候我们是并行异步处理. 这时就产生了竞态条件. 
+在串行状态时, 这样是没有什么问题的. 但很多时候我们是并行异步处理. 这时就产生了竞态条件.
 
-假设我们有一个API-A和API-B同时接受到了两个一样的请求, 使用了这个方法: 
+假设我们有一个API-A和API-B同时接受到了两个一样的请求, 使用了这个方法:
 
-A 和 B 计算出hash, 查询发现数据库并没有这个hash, 于是都准备进行插入. 
+A 和 B 计算出hash, 查询发现数据库并没有这个hash, 于是都准备进行插入.
 
 ## 竞态条件时间线分析
 
@@ -116,7 +116,7 @@ A 和 B 计算出hash, 查询发现数据库并没有这个hash, 于是都准备
 
 ## 1. **捕获异常, 处理重复创建请求**
 
-这个方案确实要好一点, 因为至少它拿到了记录. 
+这个方案确实要好一点, 因为至少它拿到了记录.
 
 ```python
 # repository.py
@@ -159,9 +159,10 @@ def create_record(self, foo: str, bar: str) -> Tuple[MyModelResponse, bool]:
 
     return MyModelResponse.from_orm(result), is_new
 ```
-这种应用层逻辑是一种比较初级的解决方案, 很直观, 符合人的线性思维, 但没有充分利用数据库的能力, 也未能处理并发环境下的复杂性. 
 
-它仍然不是原子的. 数据库操作需要讨论的"原子性", 是指"**检查是否存在, 如果不存在则创建**"的整个流程必须是原子的. 因此, 这种解决方案存在一个更微妙的风险: 
+这种应用层逻辑是一种比较初级的解决方案, 很直观, 符合人的线性思维, 但没有充分利用数据库的能力, 也未能处理并发环境下的复杂性.
+
+它仍然不是原子的. 数据库操作需要讨论的"原子性", 是指"**检查是否存在, 如果不存在则创建**"的整个流程必须是原子的. 因此, 这种解决方案存在一个更微妙的风险:
 
 | 时间点 | 进程A | 进程B | 进程C | 风险点 |
 |--------|-------|-------|-------|--------|
@@ -172,11 +173,9 @@ def create_record(self, foo: str, bar: str) -> Tuple[MyModelResponse, bool]:
 | T5 | 完成操作 | 调用 `get_by_hash()`，返回 None | 完成删除操作 | B查询不到任何记录 |
 | T6 | 完成操作 | 抛出 `HTTPException(500)` | 完成操作 | 用户收到意外的服务器错误 |
 
+## 2. **在数据库层面处理(UPSERT)**
 
-
-## 2. **在数据库层面处理(UPSERT)** 
-
-UPSERT 是 UPDATE 和 SELECT 的组合词. 
+UPSERT 是 UPDATE 和 SELECT 的组合词.
 
 如 PostgreSQL 和 sqlite 的 ON CONFLICT, MySQL的 ON DUPLICATE KEY UPDATE
 
@@ -185,6 +184,7 @@ UPSERT 是 UPDATE 和 SELECT 的组合词.
 ### 原生SQL实现
 
 **PostgreSQL:**
+
 ```sql
 INSERT INTO my_table (hash, foo, bar, created_at) 
 VALUES ('hash_value', 'foo_value', 'bar_value', NOW())
@@ -197,6 +197,7 @@ RETURNING *;
 ```
 
 **SQLite:**
+
 ```sql
 INSERT INTO my_table (hash, foo, bar, created_at) 
 VALUES ('hash_value', 'foo_value', 'bar_value', datetime('now'))
@@ -209,6 +210,7 @@ RETURNING *;
 ```
 
 **MySQL:**
+
 ```sql
 INSERT INTO my_table (hash, foo, bar, created_at)
 VALUES ('hash_value', 'foo_value', 'bar_value', NOW())
@@ -217,8 +219,6 @@ ON DUPLICATE KEY UPDATE
   bar = VALUES(bar),
   created_at = NOW();
 ```
-
-
 
 ### SQLAlchemy方言实现(PostgreSQL为例)
 
@@ -303,4 +303,3 @@ class MyService:
             raise HTTPException(status_code=500, detail=f"Database operation failed: {str(e)}")
 
 ```
-
