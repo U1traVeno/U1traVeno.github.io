@@ -150,11 +150,11 @@ comments: true
 
 ### 课程大纲(二)
 
-### Lab 0: Go语言基础
+#### Lab 0: Go语言基础
 
 Go 语法, Go环境搭建, 工作区概念, Go Modules, Goroutine
 
-### 模块一： 重新认识路由和框架
+#### 模块一： 重新认识路由和框架
 
 - 路由的本质: 先用 Go 标准库 net/http 手写一个简单的 Web 服务器，暴露路由函数。
 - 引入 Gin: 讲解 Gin 如何用更优雅的方式解决了 net/http 的路由和分组问题。
@@ -167,7 +167,7 @@ Go 语法, Go环境搭建, 工作区概念, Go Modules, Goroutine
   - 大厂基于Gin的框架
   - GORM
 
-### 模块二： 再论架构与中间件的本质
+#### 模块二： 再论架构与中间件的本质
 
 - 通过接口和构造函数手动注入依赖, 本质上为了解决相同的问题
 - 中间件的本质: 手写一个最简单的 Gin 中间件, 本质是一个接收 *gin.Context 并调用 c.Next() 的函数. 责任链模式.
@@ -179,7 +179,7 @@ Go 语法, Go环境搭建, 工作区概念, Go Modules, Goroutine
   - Go的闭包
   - go 的反射机制和适用场景
   
-### 模块三: 消息队列
+#### 模块三: 消息队列
 
 - 问题引入: 当服务所需要的请求量越来越多
 - RabbitMQ(AMQP 模型) 和 Kafka(流模型) 的区别和适用场景
@@ -193,7 +193,7 @@ Go 语法, Go环境搭建, 工作区概念, Go Modules, Goroutine
   - Kafka核心概念: Topic, Partition, Offset, Consumer Group
   - RocketMQ
   
-### 模块四: 缓存
+#### 模块四: 缓存
 
 - Redis
 - 缓存的常见策略 (Cache-aside, Read-through, Write-through)
@@ -207,7 +207,7 @@ Go 语法, Go环境搭建, 工作区概念, Go Modules, Goroutine
   - 缓存与数据库一致性问题
   - 分布式锁的概念与基于Redis的实现
 
-### 模块五：从单体到微服务
+#### 模块五：从单体到微服务
 
 - 单体应用的痛点, 为什么业界会需要微服务架构
 - RPC概念, 以及RPC的底层本质
@@ -215,7 +215,7 @@ Go 语法, Go环境搭建, 工作区概念, Go Modules, Goroutine
 - 作业:
   - 创建两个微服务：user-service 和 order-service。order-service 在创建订单时，需要通过 gRPC 调用 user-service 来验证用户信息是否存在
 
-### 模块六：Kubernetes
+#### 模块六：Kubernetes
 
 - 什么是容器编排? 为什么已经有compose了还需要k8s?
 - k8s 架构和核心概念讲解
@@ -227,10 +227,10 @@ Go 语法, Go环境搭建, 工作区概念, Go Modules, Goroutine
   - k8s 官方文档
   - ...
 
-### Project 2 : 电商平台
+#### Project 2 : 电商平台
 
 参考2024年字节后端青训营项目. 要求使用gRPC的微服务架构, 使用k8s集群进行部署.
 
-### 延伸
+#### 延伸
 
 一起收集一下常见的各种典型后端项目的设计与实现方式.
