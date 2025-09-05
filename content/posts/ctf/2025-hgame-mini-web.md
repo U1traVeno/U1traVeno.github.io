@@ -2,7 +2,7 @@
 date: '2025-08-19T12:55:10+08:00'
 draft: true
 title: '2025 Hgame Mini Web 题解'
-tags: ['ctf']
+tags: ['CTF','Web 安全', 'Python', 'Java', 'Flask', 'PHP', 'sqlmap']
 comments: true
 ---
 
