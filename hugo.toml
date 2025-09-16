@@ -4,42 +4,6 @@ title = "Veno's Blog"
 
 theme = "hugo-theme-stack"
 
-# [[menu.main]]
-# name = "Home"
-# url = "/"
-# weight = 1
-# params.icon = "home"
-
-# [[menu.main]]
-# name = "About"
-# url = "/about/"
-# weight = 2
-# params.icon = "user"
-
-# [[menu.main]]
-# name = "Archives"
-# url = "/archives/"
-# weight = 3
-# params.icon = "archives"
-
-# [[menu.main]]
-# name = "Search"
-# url = "/search/"
-# weight = 4
-# params.icon = "search"
-
-# [[menu.main]]
-# name = "Categories"
-# url = "/categories/"
-# weight = 5
-# params.icon = "categories"
-
-# [[menu.main]]
-# name = "tags"
-# url = "/tags/"
-# weight = 6
-# params.icon = "tag"
-
 [[menu.social]]
 name = "GitHub"
 url = "https://github.com/U1traVeno"
