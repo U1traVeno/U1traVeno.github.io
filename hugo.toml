@@ -66,3 +66,13 @@ lang = "zh-CN"
 loading = "lazy"
 crossorigin = "anonymous"
 
+[markup.goldmark.renderer]
+unsafe = true
+[markup.highlight]
+noClasses = false
+style = "monokai"
+lineNos = true
+lineNumbersInTable = true
+guessSyntax = true
+codeFences = true
+tabWidth = 4
