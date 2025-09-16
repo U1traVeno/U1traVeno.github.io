@@ -1,0 +1,78 @@
+baseURL = "https://v3n0.top/"
+languageCode = "zh-CN"
+title = "Veno's Blog"
+
+theme = "hugo-theme-stack"
+
+[[menu.social]]
+name = "GitHub"
+url = "https://github.com/U1traVeno"
+weight = 1
+params.icon = "brand-github"
+
+[[menu.social]]
+name = "bilibili"
+url = "https://space.bilibili.com/199795377"
+weight = 2
+params.icon = "brand-bilibili"
+
+[params]
+mainSections = ["post"]
+
+[params.sidebar]
+subtitle = "Worse is better."
+avatar.enabled = true
+avatar.local = true
+avatar.src = "avatar-veno.jpg"
+
+[[params.widgets.homepage]]
+type = "search"
+
+[[params.widgets.homepage]]
+type = "archives"
+
+[[params.widgets.homepage]]
+type = "categories"
+
+[[params.widgets.homepage]]
+type = "tag-cloud"
+
+[[params.widgets.page]]
+type = "toc"
+
+[params.article]
+math = true
+readingTime = true
+license.enabled = true
+
+[params.comments]
+enabled = true
+provider = "giscus"
+
+
+[params.comments.giscus]
+enable = true
+repo = "U1traVeno/U1traVeno.github.io"
+repoId = "R_kgDONsVpmg"
+category = "Blog Comments"
+categoryId = "DIC_kwDONsVpms4Cs2Mk"
+mapping = "pathname"
+strict = "0"
+reactionsEnabled = "1"
+emitMetadata = "0"
+inputPosition = "top"
+theme = "preferred_color_scheme"
+lang = "zh-CN"
+loading = "lazy"
+crossorigin = "anonymous"
+
+[markup.goldmark.renderer]
+unsafe = true
+[markup.highlight]
+noClasses = false
+style = "monokai"
+lineNos = true
+lineNumbersInTable = true
+guessSyntax = true
+codeFences = true
+tabWidth = 4
