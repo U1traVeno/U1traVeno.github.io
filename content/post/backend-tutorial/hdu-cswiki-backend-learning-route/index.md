@@ -4,7 +4,7 @@ draft: false
 title: 'HDU-CS-Wiki 后端开发入门教程的教学大纲设想'
 comments: true
 tags: ['HDU-CS-Wiki', '后端', '随笔']
-categories: HDU-CS-Wiki 后端教程
+categories: Veno 的后端教程
 ---
 
 2025-09-28 编辑：本人将不再参与 hdu-cs.wiki 的编辑。后端教程不会继续在 Wiki 上更新。
