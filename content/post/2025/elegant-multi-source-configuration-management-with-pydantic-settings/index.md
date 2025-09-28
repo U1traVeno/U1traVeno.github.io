@@ -1,7 +1,7 @@
 ---
 date: '2025-08-02T16:46:15+08:00'
 draft: true
-title: '使用Pydantic Settings优雅地管理多来源的应用配置'
+title: '使用 Pydantic Settings 优雅地管理多来源的应用配置'
 tags: ['Python', 'Pydantic', 'Typer']
 comments: true
 ---
