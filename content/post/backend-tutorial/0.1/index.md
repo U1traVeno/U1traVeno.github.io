@@ -2,14 +2,14 @@
 date: '2025-08-02T23:48:00+08:00'
 draft: false
 title: '0.1 导论'
-tags: ['HDU-CS-Wiki', '后端']
-categories: 'HDU-CS-Wiki 后端教程'  
+tags: ['后端教程', '后端']
+categories: 'Veno 的后端教程'  
 comments: true
 ---
 
 > 教程作者： [V3n0](https://v3n0.top)
 
-欢迎阅读 HDU-CS-Wiki 的后端教程！
+欢迎阅读 Veno 的后端教程！
 
 这篇导论会快速为你建立对于整个计算机领域的认识，并让你了解后端开发在整个开发领域的位置。之后，我会尽可能浅显直白地为你解答小白对于后端的大多数疑问。如果还有更多的问题，那么欢迎提问。
 

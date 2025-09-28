@@ -2,8 +2,8 @@
 date: '2025-08-09T23:56:22+08:00'
 draft: false
 title: '1.1 入门篇教学大纲'
-tags: ['HDU-CS-Wiki', '后端']
-categories: HDU-CS-Wiki 后端教程
+tags: ['后端教程', '后端']
+categories: Veno 的后端教程
 comments: true
 ---
 

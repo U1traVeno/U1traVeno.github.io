@@ -2,8 +2,8 @@
 date: '2025-08-10T00:09:19+08:00'
 draft: false
 title: '1.2 Lab0'
-tags: ['HDU-CS-Wiki', '后端', 'Python']
-categories: HDU-CS-Wiki 后端教程
+tags: ['后端教程', '后端', 'Python']
+categories: Veno 的后端教程
 comments: true
 ---
 :::warning

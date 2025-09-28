@@ -1,10 +1,14 @@
 ---
 date: '2025-07-20T00:21:21+08:00'
 draft: false
-title: 'HDU-CS-Wiki 后端教程大纲'
-tags: ['HDU-CS-Wiki', '后端']
-categories: HDU-CS-Wiki 后端教程
+title: '后端教程大纲'
+tags: ['后端教程', '后端']
+categories: Veno 的后端教程
 comments: true
+---
+
+2025-09-28 编辑：本人将不再参与 hdu-cs.wiki 的编辑。后端教程不会继续在 Wiki 上更新。
+
 ---
 
 ## Before Beginning

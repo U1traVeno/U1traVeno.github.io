@@ -2,8 +2,8 @@
 date: '2025-08-04T02:06:14+08:00'
 draft: false
 title: '0.2 后端答疑篇'
-tags: ['HDU-CS-Wiki', '后端', '生活']
-categories: 'HDU-CS-Wiki 后端教程'
+tags: ['后端教程', '后端', '生活']
+categories: 'Veno 的后端教程'
 comments: true
 ---
 

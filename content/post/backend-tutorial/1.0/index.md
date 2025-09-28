@@ -2,8 +2,8 @@
 date: '2025-08-09T19:56:20+08:00'
 draft: false
 title: '1.0 后端教程入门篇前言'
-tags: ['后端', 'HDU-CS-Wiki']
-categories: HDU-CS-Wiki 后端教程
+tags: ['后端', '后端教程']
+categories: Veno 的后端教程
 comments: true
 ---
 
