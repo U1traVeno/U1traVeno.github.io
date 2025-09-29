@@ -16,6 +16,11 @@ links:
     website: "https://nickxu.me"
     image: "https://nickxu.me/static/favicon.jpg"
   
+  - title: "司沐小记"
+    description: "大天而思之，孰与物畜而制之 从天而颂之，孰与制天命而用之"
+    website: "https://blog.simuoss.cn/"
+    image: "https://pic.imgdb.cn/item/654b49dec458853aef6ff6b7.webp"
+    
 menu:
   main:
     weight: -50
