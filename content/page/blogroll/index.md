@@ -21,6 +21,10 @@ links:
     website: "https://blog.simuoss.cn/"
     image: "https://pic.imgdb.cn/item/654b49dec458853aef6ff6b7.webp"
     
+  - title: uchouT 的博客
+    website: "https://uchout.moe/"
+    image: "https://uchout.moe/img/self.jpg"
+    
 menu:
   main:
     weight: -50
