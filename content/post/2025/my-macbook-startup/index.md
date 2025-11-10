@@ -253,7 +253,7 @@ brew install docker docker-compose colima
 
 ## 其他效率工具
 
-下面的工具只有 Raycast 是我常用的，另外三个我还没折腾过。
+下面的工具只有 Raycast 是我常用的，另外几个我还没折腾过。
 
 ### Raycast
 
