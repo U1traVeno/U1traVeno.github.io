@@ -25,6 +25,11 @@ links:
     website: "https://uchout.moe/"
     image: "https://uchout.moe/img/self.jpg"
     
+  - title: Mayge's Blog
+    description: Learing Algorithm Is A Hard Way   
+    website: https://m4ygem1ni.github.io/
+    image: https://raw.githubusercontent.com/M4yGem1ni/M4yGem1ni.github.io/refs/heads/master/images/favicon.ico
+    
 menu:
   main:
     weight: -50
