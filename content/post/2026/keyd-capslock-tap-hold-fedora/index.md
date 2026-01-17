@@ -16,6 +16,7 @@ tags: ['Workflow']
 ```bash
 sudo dnf copr enable -y alternateved/keyd
 sudo dnf install keyd
+sudo mkdir -p /etc/keyd/
 sudo vim /etc/keyd/default.conf
 ```
 
@@ -32,4 +33,16 @@ sudo vim /etc/keyd/default.conf
 capslock = timeout(f14, 250, capslock)
 ```
 
+启动 keyd 系统服务
+
+```bash
+sudo systemctl enable --now keyd.service
+```
+
 然后可以在 fcitx5 设置输入法切换为 f14.
+
+如果需要修改 keyd 配置, 修改后可以不必重启服务, 而是:
+
+```bash
+sudo keyd reload
+```
