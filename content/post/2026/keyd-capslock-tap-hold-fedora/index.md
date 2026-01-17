@@ -2,16 +2,16 @@
 title: "使用 keyd 在 fedora 修改 Capslock 长按短按触发信号"
 description: 
 date: 2026-01-18T00:21:27+08:00
-image: 
+image: image.png
 math: 
 license: 
 hidden: false
 comments: true
-draft: true
+draft: false
 tags: ['Workflow']
 ---
 
-> 变成 macOS 的形状了.
+> *~~变成 macOS 的形状了.~~*
 
 ```bash
 sudo dnf copr enable -y alternateved/keyd
