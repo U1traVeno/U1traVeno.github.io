@@ -22,7 +22,7 @@ sudo vim /etc/keyd/default.conf
 
 修改配置如下:
 
-```bash
+```conf
 [ids]
 *
 
