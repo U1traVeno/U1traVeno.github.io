@@ -35,7 +35,7 @@ links:
 
 ```html
 <!-- layouts/partials/footer/custom.html -->
-{{- if .Page.Store.Get "hasMermaid" -}}
+{{- if .Store.Get "hasMermaid" -}}
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
   mermaid.initialize({ startOnLoad: true });
