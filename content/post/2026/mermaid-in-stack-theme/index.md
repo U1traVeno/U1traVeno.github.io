@@ -23,6 +23,8 @@ links:
 
 [Stack docs - Custom Header / Footer](https://stack.jimmycai.com/config/header-footer)
 
+[feat: add support for Mermaid diagrams in Markdown content #1186](https://github.com/CaiJimmy/hugo-theme-stack/pull/1186)
+
 在 `layouts` 添加如下两个文件:
 
 ```html
@@ -35,12 +37,15 @@ links:
 
 ```html
 <!-- layouts/partials/footer/custom.html -->
-{{- if .Store.Get "hasMermaid" -}}
-<script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
-  mermaid.initialize({ startOnLoad: true });
-</script>
-{{- end -}}
+{{ if .Store.Get "hasMermaid" }}
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'neutral',
+    });
+  </script>
+{{ end }}
 ```
 
 在黑暗模式下显示比较有问题, 我没有折腾比较好的解决方案
