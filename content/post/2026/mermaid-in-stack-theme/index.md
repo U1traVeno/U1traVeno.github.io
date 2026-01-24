@@ -36,7 +36,7 @@ links:
 ```
 
 ```html
-<!-- layouts/partials/footer/custom.html -->
+<!-- layouts/partials/head/custom.html -->
 {{ if .Store.Get "hasMermaid" }}
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
