@@ -25,26 +25,20 @@ links:
 
 [feat: add support for Mermaid diagrams in Markdown content #1186](https://github.com/CaiJimmy/hugo-theme-stack/pull/1186)
 
-在 `layouts` 添加如下两个文件:
+在 `layouts` 添加如下文件:
 
 ```html
 <!-- layouts/_markup/render-codeblock-mermaid.html -->
 <pre class="mermaid">
   {{ .Inner | htmlEscape | safeHTML }}
 </pre>
-{{ .Page.Store.Set "hasMermaid" true }}
-```
 
-```html
-<!-- layouts/partials/head/custom.html -->
-{{ if .Store.Get "hasMermaid" }}
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: 'neutral',
-    });
-  </script>
+{{ if not (.Page.Scratch.Get "mermaidLoaded") }}
+    {{ .Page.Scratch.Set "mermaidLoaded" true }}
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+    </script>
 {{ end }}
 ```
 
