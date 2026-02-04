@@ -29,6 +29,10 @@ links:
     description: "Audentes fotuna iuvat!"
     website: "https://modo.org.cn"
     image: "https://modo.org.cn/Modo.png"
+    
+  - title: "CaPoωo's Blog"
+    website: "https://capoo.me"
+    image: "https://avatars.githubusercontent.com/u/226017516?v=4"
 
 menu:
   main:
