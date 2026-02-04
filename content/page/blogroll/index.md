@@ -7,12 +7,12 @@ links:
     image: https://cdn.xyxsw.site/hdu-cs-wiki%20full.svg
 
   - title: 飞鸟记
-    description: 爱飞的鸟的个人博客
+    description: 记录「技术」与「温度」
     website: https://blog.aflybird.cn
     image: https://avatars.githubusercontent.com/u/36830265
 
   - title: "NX の 博客"
-    description: "NX 的个人博客"
+    description: "Stay hungry, stay foolish | 求知若饥,虚心若愚"
     website: "https://nickxu.me"
     image: "https://nickxu.me/static/favicon.jpg"
   
