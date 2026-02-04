@@ -16,11 +16,6 @@ links:
     website: "https://nickxu.me"
     image: "https://nickxu.me/static/favicon.jpg"
   
-  - title: "司沐小记"
-    description: "大天而思之，孰与物畜而制之 从天而颂之，孰与制天命而用之"
-    website: "https://blog.simuoss.cn/"
-    image: "https://pic.imgdb.cn/item/654b49dec458853aef6ff6b7.webp"
-    
   - title: uchouT 的博客
     website: "https://uchout.moe/"
     image: "https://uchout.moe/img/self.jpg"
@@ -30,6 +25,11 @@ links:
     website: https://m4ygem1ni.github.io/
     image: https://raw.githubusercontent.com/M4yGem1ni/M4yGem1ni.github.io/refs/heads/master/images/favicon.ico
     
+  - title: "Modo's Kingdom"
+    description: "Audentes fotuna iuvat!"
+    website: "https://modo.org.cn"
+    image: "https://modo.org.cn/Modo.png"
+
 menu:
   main:
     weight: -50
