@@ -23,7 +23,7 @@ links:
   - title: Mayge's Blog
     description: Learing Algorithm Is A Hard Way   
     website: https://m4ygem1ni.github.io/
-    image: https://raw.githubusercontent.com/M4yGem1ni/M4yGem1ni.github.io/refs/heads/master/images/favicon.ico
+    image: https://m4ygem1ni.github.io/favicon.png
     
   - title: "Modo's Kingdom"
     description: "Audentes fotuna iuvat!"
