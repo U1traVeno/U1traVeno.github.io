@@ -2,7 +2,7 @@
 date: '2025-07-31T23:29:54+08:00'
 draft: false
 title: '使用 uv workspace 搭建 Python Monorepo'
-tags: ['Python','uv']
+tags: ['Python', 'Workflow']
 comments: true
 ---
 
