@@ -377,7 +377,7 @@ $x(t)$ 得到 $y(t)$
 $x(t)$ 本质可以分解为无数个 $\delta(t)$ 时移后的加权和, 时移的长度就是 $t_0$, 权就是 $x(t)$. 因此 $x(t)$ 应该可以被写成积分:
 
 $$
-x(t) = \int_{-\infty}^{\infty} x(t)\delta(t-\tau) d\tau
+x(t) = \int_{-\infty}^{\infty} x(\tau)\delta(t-\tau) d\tau
 $$
 
 我们知道一个 $\delta(t)$ 会激发出对应时移加权之后的 $h(t)$, $y(t)$ 应当也可以写成无数个 $h(t)$ 的时移加权和.
