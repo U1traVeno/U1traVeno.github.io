@@ -1,0 +1,6 @@
+<details class="details-shortcode">
+    <summary>{{ with .Get "summary" }}{{ . }}{{ else }}展开详情{{ end }}</summary>
+    <div class="details-content">
+        {{ .Inner | markdownify }}
+    </div>
+</details>

@@ -58,3 +58,23 @@
     font-size: 0.9rem;
     color: var(--secondary); /* 使用主题的次要文字颜色 */
 }
+
+/* Details shortcode */
+.details-shortcode {
+    background-color: var(--card-background, #f5f5f5);
+    border: 1px dashed var(--card-border-color, rgba(187,181,181,0.7));
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+}
+
+.details-shortcode summary {
+    cursor: pointer;
+    font-weight: 600;
+    user-select: none;
+    list-style: revert;
+}
+
+.details-shortcode .details-content {
+    margin-top: 0.75rem;
+}
