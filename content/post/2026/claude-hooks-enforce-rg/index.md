@@ -13,6 +13,8 @@ tags: ['Claude Code', 'Workflow', 'ripgrep']
 
 Claude Code 内置了专用的 grep 工具，但在某些场景下它仍会通过 Bash 工具直接调用 `grep`。ripgrep（`rg`）在速度、默认递归搜索、自动遵守 `.gitignore` 等方面都更优。通过配置 PreToolUse hook，可以让 Claude Code 在执行任何 grep 命令时自动切换为 rg。
 
+想法来自于[这篇视频](https://www.bilibili.com/video/BV1C7fiBXEuo/)
+
 ## Claude Code Hooks 工作原理
 
 Claude Code 支持在特定事件点注入用户脚本，称为 hooks。`PreToolUse` 事件在工具调用执行**之前**触发，可以检查、拦截即将执行的操作。
