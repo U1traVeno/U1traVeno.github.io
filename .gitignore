@@ -29,3 +29,5 @@ resources/_gen/
 
 # VScode
 .vscode/
+
+.claude/
