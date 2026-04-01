@@ -55,6 +55,7 @@ jobs:
           HUGO_CACHEDIR: ${{ runner.temp }}/hugo_cache
           HUGO_ENVIRONMENT: production
           TZ: America/Los_Angeles
+          DISCUSSION_TOKEN: ${{ secrets.DISCUSSION_TOKEN }}
         run: |
           hugo \
             --gc \

@@ -66,6 +66,10 @@ lang = "zh-CN"
 loading = "lazy"
 crossorigin = "anonymous"
 
+[security]
+  [security.funcs]
+    getenv = ['^HUGO_', '^CI$', '^DISCUSSION_TOKEN$']
+
 [markup.goldmark.renderer]
 unsafe = true
 [markup.highlight]
