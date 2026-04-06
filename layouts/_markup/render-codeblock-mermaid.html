@@ -5,7 +5,7 @@
 {{ if not (.Page.Scratch.Get "mermaidLoaded") }}
     {{ .Page.Scratch.Set "mermaidLoaded" true }}
     <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+        import mermaid from 'https://registry.npmmirror.com/mermaid/11.14.0/files/dist/mermaid.esm.min.mjs';
         mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
     </script>
 {{ end }}
