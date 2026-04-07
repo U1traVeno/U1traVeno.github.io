@@ -412,7 +412,7 @@
     }
     </style>
 
-    <link rel="stylesheet" href="https://registry.npmmirror.com/@highlightjs/cdn-assets/11.9.0/files/styles/monokai.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
 
     <script type="module">
     function loadScript(src) {
@@ -426,8 +426,8 @@
     }
 
     await Promise.all([
-        loadScript('https://registry.npmmirror.com/marked/9.1.6/files/marked.min.js'),
-        loadScript('https://registry.npmmirror.com/@highlightjs/cdn-assets/11.9.0/files/highlight.min.js'),
+        loadScript('https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js'),
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js'),
     ]);
 
     const marked = window.marked;
