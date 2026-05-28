@@ -398,6 +398,42 @@ lark-cli --version && tea --version
 
 返回 `lark-cli version 1.0.42` 和 `tea 0.12.0`。
 
+## CLI 授权状态持久化计划
+
+安装 `lark-cli` 和 `tea` 之后，还有一个更实际的问题：Agent 每次要用飞书或 Gitea 能力时，不应该重新思考“去哪登录、token 放哪、下次还在不在”。这件事不能交给 Skill 本身解决。Skill 只应该描述工具怎么用，真正的权限边界仍然应该在飞书应用权限、用户授权、Gitea token scope 和 sandbox 运行时配置上。
+
+这次先采用一个保守部署计划：
+
+- 镜像层只安装工具：`lark-cli`、`tea` 和对应 Skills
+- Skill 层只提供调用说明，不写入任何 token
+- Shipyard Neo profile 把 `HOME` 和 `XDG_CONFIG_HOME` 指到 `/workspace`
+- CLI 登录态和配置落在 `/workspace/.config`，由 Shipyard Neo Cargo 持久化
+
+这样在同一个 AstrBot 消息会话复用的 Neo sandbox 中，Agent 使用 `lark-cli` 或 `tea` 时只需要做轻量验证，例如 `lark-cli config show`、`tea whoami`，不需要每次重新设计授权流程。
+
+当前部署计划修改 `python-default` profile：
+
+```yaml
+env:
+  HOME: "/workspace"
+  XDG_CONFIG_HOME: "/workspace/.config"
+```
+
+这不是把密钥写进镜像，也不是把密钥写进 Skill，而是把两个 CLI 的默认配置目录稳定放进 sandbox workspace。后续如果要跨 sandbox 生命周期、跨 AstrBot 配置文件隔离账号，就需要进一步引入固定 external cargo、按 profile 区分配置目录，或让 AstrBot 在创建 sandbox 时把当前配置文件 ID 传给 Shipyard Neo。
+
+部署验证通过后，真实 Neo sandbox 中的结果是：
+
+```text
+XDG_CONFIG_HOME=/workspace/.config
+HOME=/workspace
+lark-cli version 1.0.42
+tea 0.12.0
+```
+
+随后我重启了 AstrBot，让旧的 sandbox booter 缓存失效。后续 Agent 进入新的 sandbox 时，会默认把 `lark-cli` 和 `tea` 的配置写入 `/workspace/.config`。这意味着常规使用时不需要每次重新判断授权目录；只要当前 sandbox 的 Cargo 还在，CLI 就能复用已有登录态。
+
+这里仍然有一个边界：AstrBot 当前创建 Shipyard Neo sandbox 时只传 `profile` 和 `ttl`，没有把当前 AstrBot 配置文件 ID 传给 Bay，也没有指定固定 external cargo。因此这个方案解决的是“同一 sandbox/Cargo 内的授权复用”，不是“任意 sandbox 销毁后永久复用同一账号”。如果要把账号状态做成长期、可分组的基础设施，需要继续扩展 profile 或 AstrBot 的 sandbox 创建参数。
+
 ## 当前结果
 
 现在我有了一个新的、干净的 AstrBot 配置仓库：
