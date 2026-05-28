@@ -430,7 +430,7 @@ lark-cli --version && tea --version
     XDG_CONFIG_HOME: "/workspace/.config"
 ```
 
-这里还有一个 AstrBot 侧的小补丁：当前 AstrBot 的 `ShipyardNeoBooter` 只传 `profile` 和 `ttl`，不会传 `cargo_id`。我在配置仓库里维护了两个 patch 文件，让它从环境变量 `ASTRBOT_SHIPYARD_NEO_CARGO_ID` 读取 external cargo ID，再传给 Bay。
+这里还有一个 AstrBot 侧的小补丁：当前 AstrBot 的 `ShipyardNeoBooter` 只传 `profile` 和 `ttl`，不会传 `cargo_id`。我在配置仓库里维护了一个启动时 patch 脚本，让它从环境变量 `ASTRBOT_SHIPYARD_NEO_CARGO_ID` 读取 external cargo ID，再传给 Bay。
 
 这个方案的边界比较清楚：
 
@@ -474,7 +474,7 @@ tea_authenticated=true
 
 原因很直接：WebUI 更新器会尝试覆盖 AstrBot 本体源码，而源码目录下有只读挂载点。即使只挂了两个文件，更新过程遇到这些路径也会被文件系统拒绝。
 
-修复方式是不要把 patch 文件直接挂到源码路径，而是挂到独立目录，并在容器启动时复制进去：
+第一版修复方式是不要把 patch 文件直接挂到源码路径，而是挂到独立目录，并在容器启动时复制进去：
 
 ```yaml
 command:
@@ -496,6 +496,48 @@ volumes:
 ```text
 computer_dir_writable=true
 ```
+
+但这个方案后面又暴露了第二层问题：WebUI 更新 AstrBot 之后，源码文件会被更新器重新覆盖。容器没有重建时，`command` 里的复制动作不会再次执行，于是运行中的 AstrBot 又退回了“不传 `cargo_id`”的原版逻辑。
+
+现象很典型：机器人调用 `lark-cli` 时又提示未配置，甚至重新发起 `lark-cli config init`。这并不是 external cargo 里的凭证丢了，而是 AstrBot 创建 sandbox 时没有再把 fixed cargo 传给 Bay，结果模型落进了新的 managed cargo。
+
+最后改成更稳的方式：不再保存整份旧源码文件，而是在启动时用一个小脚本对当前版本源码做最小文本 patch，并启动后台 watcher 周期性补打 patch：
+
+```yaml
+command:
+  - sh
+  - -c
+  - |
+    python /AstrBot/local-patches/apply-astrbot-cargo-patch.py
+    (
+      while sleep 10; do
+        python /AstrBot/local-patches/apply-astrbot-cargo-patch.py || true
+      done
+    ) &
+    exec python main.py
+volumes:
+  - ./data:/AstrBot/data:z
+  - ./patches:/AstrBot/local-patches:ro,z
+```
+
+这个脚本只做三件事：
+
+- 给 `ShipyardNeoBooter.__init__` 增加 `cargo_id`
+- 调用 `BayClient.create_sandbox()` 时传入 `cargo_id`
+- 在 `computer_client.py` 中从 `shipyard_neo_cargo_id` 或 `ASTRBOT_SHIPYARD_NEO_CARGO_ID` 读取 cargo
+
+它比整文件覆盖更适合 WebUI 更新场景：AstrBot 更新后即使源码被覆盖，watcher 也会把最小 patch 重新打回去；重启容器时也会在 `python main.py` 前先确认 patch 已应用。
+
+这次验证结论：
+
+```text
+AstrBot cargo patch applied
+lark_auth_status_ok=true
+lark_auth_list_ok=true
+tea_authenticated=true
+```
+
+所以问题不是凭证持久化无效，而是原来的 patch 生命周期不够强。fixed external cargo 仍然有效，只要 AstrBot 创建 sandbox 时持续传入正确的 `cargo_id`。
 
 ## 不同配置文件使用不同账号
 
