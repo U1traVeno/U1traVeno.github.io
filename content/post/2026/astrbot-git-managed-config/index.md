@@ -434,6 +434,31 @@ tea 0.12.0
 
 这里仍然有一个边界：AstrBot 当前创建 Shipyard Neo sandbox 时只传 `profile` 和 `ttl`，没有把当前 AstrBot 配置文件 ID 传给 Bay，也没有指定固定 external cargo。因此这个方案解决的是“同一 sandbox/Cargo 内的授权复用”，不是“任意 sandbox 销毁后永久复用同一账号”。如果要把账号状态做成长期、可分组的基础设施，需要继续扩展 profile 或 AstrBot 的 sandbox 创建参数。
 
+## 不同配置文件使用不同账号
+
+接下来还有一个更重要的设计问题：如果不同 AstrBot 配置文件要使用不同的 Gitea 账号和飞书账号，账号状态应该绑在哪里？
+
+当前 AstrBot 配置文件可以各自设置 `shipyard_neo_profile`，所以短期可以做多个 Shipyard Neo profile，例如 `python-default`、`python-feishu-flow`、`python-gitea-work`。每个 profile 用同一份工具镜像，但把 `HOME` / `XDG_CONFIG_HOME` 指向自己的目录约定。这样同一个 sandbox 内的 CLI 配置不会互相踩。
+
+但这还不是最完整的方案。因为 AstrBot 现在没有把“当前配置文件 ID”或“目标账号组”传给 Bay，也没有指定 external cargo。只靠 profile，账号状态仍然跟当前 sandbox/Cargo 生命周期绑定。
+
+更干净的长期方案是：
+
+- 在 Shipyard Neo 中为每个账号组创建 external cargo
+- 在 AstrBot 配置文件里增加或约定一个 `shipyard_neo_cargo_id`
+- 创建 sandbox 时传入 `cargo_id`
+- `lark-cli` 和 `tea` 继续把配置写到 `/workspace/.config`
+
+这样账号状态就从“某个临时 sandbox 的副产物”变成“某个 AstrBot 配置文件绑定的持久化 workspace”。例如：
+
+```text
+default config       -> cargo-default       -> /workspace/.config
+feishu-flow config   -> cargo-feishu-flow   -> /workspace/.config
+gitea-work config    -> cargo-gitea-work    -> /workspace/.config
+```
+
+如果不想改 AstrBot，最稳妥的替代方案是为不同账号组拆成不同 AstrBot 实例：每个实例有自己的配置仓库、自己的 Bay profile 或 Bay 部署、自己的 CLI 登录态。这比较笨，但隔离边界清晰，出问题时也容易回滚。
+
 ## 当前结果
 
 现在我有了一个新的、干净的 AstrBot 配置仓库：
