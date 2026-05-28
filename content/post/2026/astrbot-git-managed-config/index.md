@@ -430,7 +430,7 @@ lark-cli --version && tea --version
     XDG_CONFIG_HOME: "/workspace/.config"
 ```
 
-这里还有一个 AstrBot 侧的小补丁：当前 AstrBot 的 `ShipyardNeoBooter` 只传 `profile` 和 `ttl`，不会传 `cargo_id`。我在配置仓库里维护了一个启动时 patch 脚本，让它从环境变量 `ASTRBOT_SHIPYARD_NEO_CARGO_ID` 读取 external cargo ID，再传给 Bay。
+这里一开始还有一个 AstrBot 侧的小补丁：当前 AstrBot 的 `ShipyardNeoBooter` 只传 `profile` 和 `ttl`，不会传 `cargo_id`。后来证明这个方向不稳，因为 WebUI 更新 AstrBot 时会覆盖运行时源码。最终方案改为 Bay 侧 `profile -> cargo` 映射：AstrBot 仍然只传 `profile=python-lark`，Bay 在创建 sandbox 时自动补上对应的 external cargo。
 
 这个方案的边界比较清楚：
 
@@ -438,7 +438,7 @@ lark-cli --version && tea --version
 - token 不进 Skill
 - token 不出现在博客或公开日志里
 - CLI 凭证落在 external cargo 的 `/workspace/.config`
-- Git 只记录可复现的部署配置和 AstrBot 侧的 patch
+- AstrBot 容器不再改源码，Git 只记录 Bay 侧配置和可复现的部署代码
 
 持久化验证也做过一次：在 external cargo 里写入测试文件，删除 sandbox 后重新创建，文件仍然存在。这说明凭证目录不再依赖某个临时 sandbox 生命周期。
 
@@ -501,7 +501,7 @@ computer_dir_writable=true
 
 现象很典型：机器人调用 `lark-cli` 时又提示未配置，甚至重新发起 `lark-cli config init`。这并不是 external cargo 里的凭证丢了，而是 AstrBot 创建 sandbox 时没有再把 fixed cargo 传给 Bay，结果模型落进了新的 managed cargo。
 
-最后改成更稳的方式：不再保存整份旧源码文件，而是在启动时用一个小脚本对当前版本源码做最小文本 patch，并启动后台 watcher 周期性补打 patch：
+第二版改成了启动时最小文本 patch，并启动后台 watcher 周期性补打 patch。它能止血，但本质上还是在 AstrBot 容器里改源码：
 
 ```yaml
 command:
@@ -526,30 +526,58 @@ volumes:
 - 调用 `BayClient.create_sandbox()` 时传入 `cargo_id`
 - 在 `computer_client.py` 中从 `shipyard_neo_cargo_id` 或 `ASTRBOT_SHIPYARD_NEO_CARGO_ID` 读取 cargo
 
-它比整文件覆盖更适合 WebUI 更新场景：AstrBot 更新后即使源码被覆盖，watcher 也会把最小 patch 重新打回去；重启容器时也会在 `python main.py` 前先确认 patch 已应用。
+它比整文件覆盖更适合 WebUI 更新场景，但仍然不适合作为长期方案。真正的问题不是 AstrBot 是否能读某个环境变量，而是“创建 sandbox 时该由谁决定 cargo”。这个决定更应该放在 Bay 这个 sandbox 控制面里。
+
+最终我把方案改到了 Bay 侧：
+
+```yaml
+cargo:
+  root_path: "/var/lib/bay/cargos"
+  default_size_limit_mb: 1024
+  mount_path: "/workspace"
+  profile_defaults:
+    python-lark: "ws-fd07bebac9ae"
+```
+
+Bay 的逻辑变成：
+
+- 如果请求显式带了 `cargo_id`，尊重请求
+- 如果请求没带 `cargo_id`，先按 `profile` 查 `cargo.profile_defaults`
+- 命中默认 cargo 时，用该 external cargo 创建 sandbox
+- 绑定 fixed cargo 的 profile 跳过 warm pool，因为 warm sandbox 自带 managed cargo，不能重绑
+
+于是 AstrBot 侧可以恢复成原生容器：
+
+```yaml
+environment:
+  - TZ=${TZ:-Asia/Shanghai}
+volumes:
+  - ./data:/AstrBot/data:z
+  - /etc/localtime:/etc/localtime:ro
+```
 
 这次验证结论：
 
 ```text
-AstrBot cargo patch applied
+bay_default_cargo_applied=true
 lark_auth_status_ok=true
 lark_auth_list_ok=true
 tea_authenticated=true
 ```
 
-所以问题不是凭证持久化无效，而是原来的 patch 生命周期不够强。fixed external cargo 仍然有效，只要 AstrBot 创建 sandbox 时持续传入正确的 `cargo_id`。
+所以问题不是凭证持久化无效，而是原来的 patch 生命周期不够强。fixed external cargo 仍然有效；现在由 Bay 根据 `profile` 稳定选择 cargo，不再依赖 AstrBot 源码 patch。
 
 ## 不同配置文件使用不同账号
 
 接下来还有一个更重要的设计问题：如果不同 AstrBot 配置文件要使用不同的 Gitea 账号和飞书账号，账号状态应该绑在哪里？
 
-当前 AstrBot 配置文件可以各自设置 `shipyard_neo_profile`，所以短期可以做多个 Shipyard Neo profile，例如 `python-lark`、`python-feishu-flow`、`python-gitea-work`。每个 profile 可以复用同一份工具镜像，但绑定不同 external cargo。这样每个账号组都有自己的 `/workspace/.config`，CLI 配置不会互相踩。
+当前 AstrBot 配置文件可以各自设置 `shipyard_neo_profile`，所以短期可以做多个 Shipyard Neo profile，例如 `python-lark`、`python-feishu-flow`、`python-gitea-work`。每个 profile 可以复用同一份工具镜像，但在 Bay 的 `cargo.profile_defaults` 里绑定不同 external cargo。这样每个账号组都有自己的 `/workspace/.config`，CLI 配置不会互相踩。
 
 更干净的长期方案是把账号组作为部署资源管理：
 
 - 在 Shipyard Neo 中为每个账号组创建 external cargo
-- 在 AstrBot 配置文件里增加或约定一个账号组标识
-- 由 AstrBot booter 根据账号组选择对应 `cargo_id`
+- 在 AstrBot 配置文件里用 `shipyard_neo_profile` 表达账号组
+- 由 Bay 根据 profile 选择对应 `cargo_id`
 - 创建 sandbox 时传入 `cargo_id`
 - `lark-cli` 和 `tea` 继续把配置写到 `/workspace/.config`
 
@@ -561,7 +589,7 @@ feishu-flow config   -> cargo-feishu-flow   -> /workspace/.config
 gitea-work config    -> cargo-gitea-work    -> /workspace/.config
 ```
 
-现在已经有了读取 `ASTRBOT_SHIPYARD_NEO_CARGO_ID` 的本地 patch，所以单账号组持久化已经跑通。后续要支持多账号组，应该把这个环境变量方案升级成“按配置文件选择 cargo”的映射表，而不是继续把所有账号都塞进同一个 cargo。
+现在已经有了 Bay 侧 `profile -> cargo` 映射，所以单账号组持久化已经跑通。后续要支持多账号组，只需要继续增加 profile 和 external cargo 映射，而不是继续把所有账号都塞进同一个 cargo。
 
 如果不想继续改 AstrBot，最稳妥的替代方案仍然是为不同账号组拆成不同 AstrBot 实例：每个实例有自己的配置仓库、自己的 Bay profile 或 Bay 部署、自己的 CLI 登录态。这比较笨，但隔离边界清晰，出问题时也容易回滚。
 
