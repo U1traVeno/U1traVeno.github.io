@@ -398,54 +398,74 @@ lark-cli --version && tea --version
 
 返回 `lark-cli version 1.0.42` 和 `tea 0.12.0`。
 
-## CLI 授权状态持久化计划
+## CLI 授权状态持久化
 
 安装 `lark-cli` 和 `tea` 之后，还有一个更实际的问题：Agent 每次要用飞书或 Gitea 能力时，不应该重新思考“去哪登录、token 放哪、下次还在不在”。这件事不能交给 Skill 本身解决。Skill 只应该描述工具怎么用，真正的权限边界仍然应该在飞书应用权限、用户授权、Gitea token scope 和 sandbox 运行时配置上。
 
-这次先采用一个保守部署计划：
+一开始我以为只要把 `HOME` 和 `XDG_CONFIG_HOME` 指到 `/workspace`，就能靠 Shipyard Neo Cargo 保存 CLI 登录态。后面继续查文档和实际验证后发现，这个判断只对了一半：managed cargo 会随着 sandbox 删除而释放，不能作为长期账号凭证存储。真正适合保存 CLI 凭证的是 external cargo。
+
+最终部署改成了这样：
 
 - 镜像层只安装工具：`lark-cli`、`tea` 和对应 Skills
 - Skill 层只提供调用说明，不写入任何 token
-- Shipyard Neo profile 把 `HOME` 和 `XDG_CONFIG_HOME` 指到 `/workspace`
-- CLI 登录态和配置落在 `/workspace/.config`，由 Shipyard Neo Cargo 持久化
+- Shipyard Neo 增加显式 profile：`python-lark`
+- `python-lark` 继续使用同一份工具镜像，并设置 `HOME=/workspace`、`XDG_CONFIG_HOME=/workspace/.config`
+- Bay 中创建一个 external cargo，专门持久化 `/workspace`
+- AstrBot 创建 sandbox 时传入固定 `cargo_id`
 
-这样在同一个 AstrBot 消息会话复用的 Neo sandbox 中，Agent 使用 `lark-cli` 或 `tea` 时只需要做轻量验证，例如 `lark-cli config show`、`tea whoami`，不需要每次重新设计授权流程。
-
-当前部署计划修改 `python-default` profile：
+对应的 Shipyard Neo profile 是：
 
 ```yaml
-env:
-  HOME: "/workspace"
-  XDG_CONFIG_HOME: "/workspace/.config"
+- id: python-lark
+  description: "Python sandbox with lark-cli and tea, using persistent CLI config"
+  image: "shipyard-neo-ship-lark:latest"
+  runtime_type: ship
+  runtime_port: 8123
+  capabilities:
+    - filesystem
+    - shell
+    - python
+  env:
+    HOME: "/workspace"
+    XDG_CONFIG_HOME: "/workspace/.config"
 ```
 
-这不是把密钥写进镜像，也不是把密钥写进 Skill，而是把两个 CLI 的默认配置目录稳定放进 sandbox workspace。后续如果要跨 sandbox 生命周期、跨 AstrBot 配置文件隔离账号，就需要进一步引入固定 external cargo、按 profile 区分配置目录，或让 AstrBot 在创建 sandbox 时把当前配置文件 ID 传给 Shipyard Neo。
+这里还有一个 AstrBot 侧的小补丁：当前 AstrBot 的 `ShipyardNeoBooter` 只传 `profile` 和 `ttl`，不会传 `cargo_id`。我在配置仓库里用 patch mount 覆盖了相关文件，让它从环境变量 `ASTRBOT_SHIPYARD_NEO_CARGO_ID` 读取 external cargo ID，再传给 Bay。
 
-部署验证通过后，真实 Neo sandbox 中的结果是：
+这个方案的边界比较清楚：
+
+- token 不进镜像
+- token 不进 Skill
+- token 不出现在博客或公开日志里
+- CLI 凭证落在 external cargo 的 `/workspace/.config`
+- Git 只记录可复现的部署配置和 AstrBot 侧的 patch
+
+持久化验证也做过一次：在 external cargo 里写入测试文件，删除 sandbox 后重新创建，文件仍然存在。这说明凭证目录不再依赖某个临时 sandbox 生命周期。
+
+随后完成了两个 CLI 的登录和验证：
 
 ```text
-XDG_CONFIG_HOME=/workspace/.config
-HOME=/workspace
-lark-cli version 1.0.42
-tea 0.12.0
+lark_configured=true
+lark_auth_status_ok=true
+lark_auth_list_ok=true
+tea_authenticated=true
 ```
 
-随后我重启了 AstrBot，让旧的 sandbox booter 缓存失效。后续 Agent 进入新的 sandbox 时，会默认把 `lark-cli` 和 `tea` 的配置写入 `/workspace/.config`。这意味着常规使用时不需要每次重新判断授权目录；只要当前 sandbox 的 Cargo 还在，CLI 就能复用已有登录态。
+其中 `tea` 已能访问目标 Gitea 实例，账号验证为 `veno`。Lark 侧使用脱敏验证方式，只检查 `config show`、`auth status`、`auth list` 的退出码，不打印任何 app secret、access token 或用户授权内容。
 
-这里仍然有一个边界：AstrBot 当前创建 Shipyard Neo sandbox 时只传 `profile` 和 `ttl`，没有把当前 AstrBot 配置文件 ID 传给 Bay，也没有指定固定 external cargo。因此这个方案解决的是“同一 sandbox/Cargo 内的授权复用”，不是“任意 sandbox 销毁后永久复用同一账号”。如果要把账号状态做成长期、可分组的基础设施，需要继续扩展 profile 或 AstrBot 的 sandbox 创建参数。
+到这里，AstrBot 在后续调用 `lark-cli` 和 `tea` 时，不需要每次重新设计授权流程。模型只需要按 Skill 使用命令；具体能读写什么，由飞书服务端权限、用户授权范围、Gitea token scope 和 external cargo 中的当前登录态共同决定。
 
 ## 不同配置文件使用不同账号
 
 接下来还有一个更重要的设计问题：如果不同 AstrBot 配置文件要使用不同的 Gitea 账号和飞书账号，账号状态应该绑在哪里？
 
-当前 AstrBot 配置文件可以各自设置 `shipyard_neo_profile`，所以短期可以做多个 Shipyard Neo profile，例如 `python-default`、`python-feishu-flow`、`python-gitea-work`。每个 profile 用同一份工具镜像，但把 `HOME` / `XDG_CONFIG_HOME` 指向自己的目录约定。这样同一个 sandbox 内的 CLI 配置不会互相踩。
+当前 AstrBot 配置文件可以各自设置 `shipyard_neo_profile`，所以短期可以做多个 Shipyard Neo profile，例如 `python-lark`、`python-feishu-flow`、`python-gitea-work`。每个 profile 可以复用同一份工具镜像，但绑定不同 external cargo。这样每个账号组都有自己的 `/workspace/.config`，CLI 配置不会互相踩。
 
-但这还不是最完整的方案。因为 AstrBot 现在没有把“当前配置文件 ID”或“目标账号组”传给 Bay，也没有指定 external cargo。只靠 profile，账号状态仍然跟当前 sandbox/Cargo 生命周期绑定。
-
-更干净的长期方案是：
+更干净的长期方案是把账号组作为部署资源管理：
 
 - 在 Shipyard Neo 中为每个账号组创建 external cargo
-- 在 AstrBot 配置文件里增加或约定一个 `shipyard_neo_cargo_id`
+- 在 AstrBot 配置文件里增加或约定一个账号组标识
+- 由 AstrBot booter 根据账号组选择对应 `cargo_id`
 - 创建 sandbox 时传入 `cargo_id`
 - `lark-cli` 和 `tea` 继续把配置写到 `/workspace/.config`
 
@@ -457,7 +477,9 @@ feishu-flow config   -> cargo-feishu-flow   -> /workspace/.config
 gitea-work config    -> cargo-gitea-work    -> /workspace/.config
 ```
 
-如果不想改 AstrBot，最稳妥的替代方案是为不同账号组拆成不同 AstrBot 实例：每个实例有自己的配置仓库、自己的 Bay profile 或 Bay 部署、自己的 CLI 登录态。这比较笨，但隔离边界清晰，出问题时也容易回滚。
+现在已经有了读取 `ASTRBOT_SHIPYARD_NEO_CARGO_ID` 的本地 patch，所以单账号组持久化已经跑通。后续要支持多账号组，应该把这个环境变量方案升级成“按配置文件选择 cargo”的映射表，而不是继续把所有账号都塞进同一个 cargo。
+
+如果不想继续改 AstrBot，最稳妥的替代方案仍然是为不同账号组拆成不同 AstrBot 实例：每个实例有自己的配置仓库、自己的 Bay profile 或 Bay 部署、自己的 CLI 登录态。这比较笨，但隔离边界清晰，出问题时也容易回滚。
 
 ## 当前结果
 
@@ -467,15 +489,13 @@ gitea-work config    -> cargo-gitea-work    -> /workspace/.config
 /home/veno/Projects/astrbot-config
 ```
 
-它已经能通过 Docker Compose 启动 AstrBot，并且将运行态数据和可同步配置分开。
+它已经能通过 Docker Compose 启动 AstrBot，并且接上了可持久化 CLI 凭证的 Shipyard Neo sandbox。
 
 下一步再继续往这个仓库里加：
 
-- Shipyard Neo 沙箱配置
-- 内置 `lark-cli` 和 `tea` 的工具运行环境
 - 用 Git 管理的全局 Skills
 - 插件内置 Skills
 - 自研 Gitea / 飞书同步插件
 - 可同步的机器人记忆、规则和状态映射
 
-第一阶段先到这里：先让 AstrBot 以一个可复现的 GitOps 形态跑起来。
+第一阶段先到这里：先让 AstrBot 以一个可复现的 GitOps 形态跑起来，并让后续工具调用不再重复处理基础授权问题。
