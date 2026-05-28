@@ -370,7 +370,7 @@ e75b5fd chore: track astrbot webui config privately
 - Bay endpoint：`http://bay:8114`，供 AstrBot 通过 Docker 网络访问
 - AstrBot `computer_use_runtime`：`sandbox`
 - AstrBot `sandbox.booter`：`shipyard_neo`
-- AstrBot `shipyard_neo_profile`：`python-default`
+- AstrBot `shipyard_neo_profile`：`python-lark`
 - Bay token：按文档写入 `shipyard_neo_access_token`，继续由私有配置仓库管理
 
 Fedora 上还遇到一个实际问题：Bay 需要访问 Docker socket 来创建 sandbox 容器，但 SELinux 会拦截默认 bind mount。由于 Bay 挂 Docker socket 本身就已经是高权限组件，我在 Bay service 上显式加了：
@@ -390,7 +390,7 @@ Feishu CLI 和 Skills 按 `larksuite/cli` 官方仓库处理：
 - 镜像内执行官方推荐的 `npx /cli install` 安装 `lark-cli`
 - 额外加入本机已有的静态 `tea` 二进制
 
-最终验证：Bay 能创建 `python-default` sandbox，并且在真实 sandbox 内执行：
+最终验证：Bay 能创建 `python-lark` sandbox，并且在真实 sandbox 内执行：
 
 ```bash
 lark-cli --version && tea --version
@@ -430,7 +430,7 @@ lark-cli --version && tea --version
     XDG_CONFIG_HOME: "/workspace/.config"
 ```
 
-这里还有一个 AstrBot 侧的小补丁：当前 AstrBot 的 `ShipyardNeoBooter` 只传 `profile` 和 `ttl`，不会传 `cargo_id`。我在配置仓库里用 patch mount 覆盖了相关文件，让它从环境变量 `ASTRBOT_SHIPYARD_NEO_CARGO_ID` 读取 external cargo ID，再传给 Bay。
+这里还有一个 AstrBot 侧的小补丁：当前 AstrBot 的 `ShipyardNeoBooter` 只传 `profile` 和 `ttl`，不会传 `cargo_id`。我在配置仓库里维护了两个 patch 文件，让它从环境变量 `ASTRBOT_SHIPYARD_NEO_CARGO_ID` 读取 external cargo ID，再传给 Bay。
 
 这个方案的边界比较清楚：
 
@@ -454,6 +454,48 @@ tea_authenticated=true
 其中 `tea` 已能访问目标 Gitea 实例，账号验证为 `veno`。Lark 侧使用脱敏验证方式，只检查 `config show`、`auth status`、`auth list` 的退出码，不打印任何 app secret、access token 或用户授权内容。
 
 到这里，AstrBot 在后续调用 `lark-cli` 和 `tea` 时，不需要每次重新设计授权流程。模型只需要按 Skill 使用命令；具体能读写什么，由飞书服务端权限、用户授权范围、Gitea token scope 和 external cargo 中的当前登录态共同决定。
+
+## WebUI 更新与源码 Patch
+
+这里后来又踩到一个和 WebUI 更新有关的坑。
+
+最初为了让 AstrBot 读取 `ASTRBOT_SHIPYARD_NEO_CARGO_ID`，我把两个 patch 文件直接以只读 bind mount 的方式挂到了容器里的源码路径：
+
+```text
+/AstrBot/astrbot/core/computer/booters/shipyard_neo.py
+/AstrBot/astrbot/core/computer/computer_client.py
+```
+
+这样运行时没问题，但从 WebUI 更新 AstrBot 时会失败：
+
+```text
+[Errno 30] Read-only file system: '/AstrBot/astrbot/core/computer'
+```
+
+原因很直接：WebUI 更新器会尝试覆盖 AstrBot 本体源码，而源码目录下有只读挂载点。即使只挂了两个文件，更新过程遇到这些路径也会被文件系统拒绝。
+
+修复方式是不要把 patch 文件直接挂到源码路径，而是挂到独立目录，并在容器启动时复制进去：
+
+```yaml
+command:
+  - sh
+  - -c
+  - |
+    cp /AstrBot/local-patches/astrbot/core/computer/booters/shipyard_neo.py /AstrBot/astrbot/core/computer/booters/shipyard_neo.py
+    cp /AstrBot/local-patches/astrbot/core/computer/computer_client.py /AstrBot/astrbot/core/computer/computer_client.py
+    exec python main.py
+volumes:
+  - ./data:/AstrBot/data:z
+  - ./patches/astrbot:/AstrBot/local-patches/astrbot:ro,z
+```
+
+这样 patch 来源仍然是只读的、可 Git 管理的，但 `/AstrBot/astrbot/core/computer` 本身恢复为容器内可写目录。WebUI 更新 AstrBot 时不会再被 bind mount 卡住；容器重启后也会重新应用本地 patch。
+
+修复后验证：
+
+```text
+computer_dir_writable=true
+```
 
 ## 不同配置文件使用不同账号
 
