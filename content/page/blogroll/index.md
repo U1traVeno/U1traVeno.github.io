@@ -25,10 +25,10 @@ links:
     website: https://m4ygem1ni.github.io/
     image: https://m4ygem1ni.github.io/favicon.png
     
-  - title: "Modo's Kingdom"
+  - title: "Modo's Dreamland"
     description: "Audentes fotuna iuvat!"
     website: "https://modo.org.cn"
-    image: "https://modo.org.cn/Modo.png"
+    image: "https://avatars.githubusercontent.com/u/227043249?v=4"
     
   - title: "CaPoωo's Blog"
     website: "https://capoo.me"
