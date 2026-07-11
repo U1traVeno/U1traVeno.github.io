@@ -1,5 +1,5 @@
 baseURL = "https://v3n0.top/"
-languageCode = "zh-CN"
+locale = "zh-CN"
 title = "Veno's Blog"
 
 theme = "hugo-theme-stack"
