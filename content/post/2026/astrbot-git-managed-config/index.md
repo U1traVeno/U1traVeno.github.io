@@ -1,5 +1,5 @@
 ---
-title: "从零开始搭建一个 Git 管理的 AstrBot 配置仓库"
+title: "[过时]从零开始搭建一个 Git 管理的 AstrBot 配置仓库"
 description: "记录把 AstrBot 的运行配置、插件和 Skills 拆成独立 Git 仓库，并先用 Docker Compose 跑通最小实例的过程。"
 date: 2026-05-28T17:21:56+08:00
 image:
@@ -9,6 +9,12 @@ hidden: false
 comments: true
 draft: false
 tags: ['AstrBot', 'Docker Compose', 'GitOps', 'Workflow']
+---
+
+2026.7.12 编辑：
+
+使用体验是，Astrbot 的 Agent 能力相当差劲，不适合作为团队共用的 Agent。并且实际上想把它做成配置式的应用也相当麻烦。除非仅作为学习探索目的，否则不建议实际使用。
+
 ---
 
 最近想把 AstrBot 当成一个长期可维护的团队机器人入口：后续它要接飞书、Gitea、沙箱、`lark-cli`、`tea`、自定义插件和 Skills。如果这些东西都只堆在某台机器的 `data/` 目录里，迟早会变成不可复现的手工状态。
