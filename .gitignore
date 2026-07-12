@@ -31,3 +31,6 @@ resources/_gen/
 .vscode/
 
 .claude/
+
+# Obsidian workspace metadata
+/.obsidian/
