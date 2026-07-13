@@ -9,6 +9,7 @@ hidden: false
 comments: true
 draft: false
 tags: ["Paramer", "团队管理"]
+categories: Paramer 开发记录
 ---
 
 拖更两个月，惭愧，但这两个月也是积累了相当多的新思考。

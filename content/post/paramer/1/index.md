@@ -9,6 +9,7 @@ hidden: false
 comments: true
 draft: false
 tags: ["Paramer"]
+categories: Paramer 开发记录
 ---
 
 著名的程序员 V 说过：
