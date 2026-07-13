@@ -19,6 +19,20 @@ params.icon = "brand-bilibili"
 [params]
 mainSections = ["post"]
 
+[params.homepage.pinned]
+enabled = true
+categoryArticleLimit = 3
+
+[[params.homepage.pinned.items]]
+type = "category"
+value = "Paramer 开发记录"
+
+# 单篇文章置顶示例：
+# [[params.homepage.pinned.items]]
+# type = "article"
+# value = "/post/2026/hugo-stack-pinned-categories-and-articles/"
+# label = "可选的自定义标题"
+
 [params.sidebar]
 subtitle = "Worse is better."
 avatar.enabled = true

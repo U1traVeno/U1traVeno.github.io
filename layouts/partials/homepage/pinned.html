@@ -1,0 +1,62 @@
+{{- $config := .Site.Params.homepage.pinned -}}
+{{- if and $config.enabled $config.items -}}
+    <section class="homepage-pinned" aria-label="置顶内容">
+        <div class="homepage-pinned__items">
+            {{- range $item := $config.items -}}
+                {{- $itemType := lower (default "article" $item.type) -}}
+                {{- if eq $itemType "category" -}}
+                    {{- $termKey := lower $item.value -}}
+                    {{- $termSlug := lower ($item.value | urlize) -}}
+                    {{- $termPages := index $.Site.Taxonomies.categories $termKey -}}
+                    {{- with $termPages -}}
+                        {{- $visiblePages := where .Pages "Params.hidden" "!=" true -}}
+                        {{- $limit := int (default 3 $config.categoryArticleLimit) -}}
+                        <article class="homepage-pinned__item homepage-pinned__collection">
+                            <span class="homepage-pinned__badge" role="img" aria-label="置顶" title="置顶">
+                                {{ partial "helper/icon" "pinned" }}
+                            </span>
+                            <a class="homepage-pinned__item-header" href="{{ printf "/categories/%s/" $termSlug | relURL }}">
+                                <h3>{{ default $item.value $item.label }}</h3>
+                                <span class="homepage-pinned__count">{{ len $visiblePages }} 篇</span>
+                            </a>
+                            <ol class="homepage-pinned__articles">
+                                {{- range first $limit $visiblePages.ByDate.Reverse -}}
+                                    <li>
+                                        <a href="{{ .RelPermalink }}">
+                                            <span>{{ .Title }}</span>
+                                            <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
+                                        </a>
+                                    </li>
+                                {{- end -}}
+                            </ol>
+                        </article>
+                    {{- else -}}
+                        {{- warnf "Pinned homepage category %q does not exist" $item.value -}}
+                    {{- end -}}
+                {{- else if eq $itemType "article" -}}
+                    {{- $page := $.Site.GetPage $item.value -}}
+                    {{- with $page -}}
+                        <article class="homepage-pinned__item homepage-pinned__article">
+                            <span class="homepage-pinned__badge" role="img" aria-label="置顶" title="置顶">
+                                {{ partial "helper/icon" "pinned" }}
+                            </span>
+                            <a class="homepage-pinned__item-header" href="{{ .RelPermalink }}">
+                                <h3>{{ default .Title $item.label }}</h3>
+                                <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
+                            </a>
+                            {{- with .Description -}}
+                                <p>{{ . }}</p>
+                            {{- else -}}
+                                {{- with .Summary -}}<p>{{ . | plainify | truncate 120 }}</p>{{- end -}}
+                            {{- end -}}
+                        </article>
+                    {{- else -}}
+                        {{- warnf "Pinned homepage article %q does not exist" $item.value -}}
+                    {{- end -}}
+                {{- else -}}
+                    {{- warnf "Unsupported pinned homepage item type %q" $item.type -}}
+                {{- end -}}
+            {{- end -}}
+        </div>
+    </section>
+{{- end -}}

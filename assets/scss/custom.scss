@@ -1,0 +1,106 @@
+.homepage-pinned {
+    margin-bottom: var(--section-separation);
+
+    &__items {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 15px;
+    }
+
+    &__item {
+        position: relative;
+        min-width: 0;
+        overflow: hidden;
+        border-radius: var(--card-border-radius);
+        background: var(--card-background);
+        box-shadow: var(--shadow-l1);
+    }
+
+    &__item-header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px 15px;
+        padding: 20px 64px 20px 20px;
+        color: var(--card-text-color-main);
+
+        h3 {
+            min-width: 0;
+            margin: 0;
+            overflow-wrap: anywhere;
+            font-size: 2rem;
+            line-height: 1.35;
+        }
+
+        time,
+        .homepage-pinned__count {
+            align-self: center;
+            color: var(--card-text-color-tertiary);
+            font-size: 1.3rem;
+            white-space: nowrap;
+        }
+    }
+
+    &__badge {
+        position: absolute;
+        z-index: 1;
+        top: 16px;
+        right: 16px;
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border-radius: var(--tag-border-radius);
+        background: var(--accent-color);
+        color: var(--accent-color-text);
+
+        svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+        }
+    }
+
+    &__articles {
+        margin: 0;
+        padding: 0 20px 14px;
+        list-style: none;
+
+        li {
+            border-top: 1px solid var(--card-separator-color);
+        }
+
+        a {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 15px;
+            align-items: center;
+            padding: 12px 0;
+            color: var(--card-text-color-secondary);
+            font-size: 1.4rem;
+
+            span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            time {
+                color: var(--card-text-color-tertiary);
+                font-size: 1.2rem;
+            }
+        }
+    }
+
+    &__article p {
+        margin: -5px 20px 20px;
+        color: var(--card-text-color-secondary);
+        font-size: 1.4rem;
+        line-height: 1.6;
+    }
+
+    @include respond(md) {
+        &__items {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+    }
+}
