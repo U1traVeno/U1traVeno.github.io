@@ -7,7 +7,7 @@ math:
 license: 
 hidden: false
 comments: true
-draft: true
+draft: false
 tags: ["Hermes Agent", "HomeLab", "Fedora", "Nix", "Home Manager", "SSH"]
 ---
 
