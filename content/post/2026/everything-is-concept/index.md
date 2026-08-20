@@ -1,6 +1,6 @@
 ---
-title: "万物皆概念：如何最大化学习速度？"
-description: "把知识体系建模为递归的概念 DAG 图，并通过寻找与构造最低成本有效推导子图来优化学习效率。"
+title: "[outdated] 万物皆概念：如何最大化学习速度？"
+description: 把知识体系建模为递归的概念 DAG 图，并通过寻找与构造最低成本有效推导子图来优化学习效率。
 date: 2026-08-19T01:32:48+08:00
 image:
 math: true
@@ -8,7 +8,10 @@ license:
 hidden: false
 comments: true
 draft: false
-tags: ['学习方法', '知识图谱', '图论']
+tags:
+  - 学习方法
+  - 知识图谱
+  - 图论
 ---
 
 我们怎样才能最大化学习速度？
