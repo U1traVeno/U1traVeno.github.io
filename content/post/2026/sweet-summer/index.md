@@ -7,7 +7,7 @@ math:
 license:
 hidden: false
 comments: true
-draft: true
+draft: false
 ---
 我表达欲也许实际上非常旺盛，因为我一旦写起文章就停不下来，动辄几千字，可比高中写无聊的八股有意思的多，而且不需要用笔写，用键盘就行。
 
