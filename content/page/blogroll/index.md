@@ -15,6 +15,11 @@ links:
     description: "Stay hungry, stay foolish | 求知若饥,虚心若愚"
     website: "https://nickxu.me"
     image: "https://nickxu.me/static/favicon.jpg"
+
+  - title: "矢量起源 | VectorOrigin"
+    description: "Simuoss 的个人公众号, 某厂Agent系统架构师，主导多个企业级Agent系统落地。分享行业Agent/RAG/Harness/Eval系统实践经验"
+    website: "https://mp.weixin.qq.com/s/i6k2sEBauHHHJO-c7gQp"
+    image: "https://github.com/user-attachments/assets/6d042a2a-4b61-44b4-9958-134421fbb798"
   
   - title: uchouT 的博客
     website: "https://uchout.moe/"
