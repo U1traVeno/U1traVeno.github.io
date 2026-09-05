@@ -14,11 +14,22 @@ menu:
 
 ## Veno是谁
 
-Veno 是一个在杭州上学的学生。他的用户名也许叫 V3n0, U1traVeno。
+Veno 的用户名也许叫 V3n0, U1traVeno。不喜欢英文也可以叫我紫外线。
 
-除了开发之外，最近可能喜欢上一些哲学，做咖啡，调酒，以及西方神秘学体系。
+最近正在个人开发 [Derivon](https://github.com/derivon-research)，现在我是：
 
-最近在玩的游戏：Minecraft，Deadlock，雀魂
+- PM，市场，运营
+- UI / UX 设计师
+- 系统架构师
+- Agent 系统架构师
+- DevOps / 运维工程师
+- 算法工程师
+- 全栈工程师
+- AI / Agent 工程师
+
+喜欢咖啡，烹饪，调酒。最近可能对神话体系/神秘学、哲学、历史比较感兴趣，打算围绕《家庭、私有制和国家起源》开一个博客系列（又是一个填不完的坑）
+
+在玩的游戏：Minecraft，Deadlock，雀魂
 
 编辑于 2026.9.5
 
