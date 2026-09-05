@@ -16,7 +16,7 @@ menu:
 
 Veno 的用户名也许叫 V3n0, U1traVeno。不喜欢英文也可以叫我紫外线。
 
-最近正在个人开发 [Derivon](https://github.com/derivon-research)，现在我是：
+最近正在个人开发 [Derivon](https://github.com/derivon-research)，现在我某种程度上算是：
 
 - PM，市场，运营
 - UI / UX 设计师
