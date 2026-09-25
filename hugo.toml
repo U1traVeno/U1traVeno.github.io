@@ -4,6 +4,9 @@ title = "Veno's Blog"
 
 theme = "hugo-theme-stack"
 
+# 发布日期在未来的内容也构建（避免 CI 构建时刻早于 date 而丢页面）
+buildFuture = true
+
 [[menu.social]]
 name = "GitHub"
 url = "https://github.com/U1traVeno"
