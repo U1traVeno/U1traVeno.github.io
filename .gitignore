@@ -34,3 +34,6 @@ resources/_gen/
 
 # Obsidian workspace metadata
 /.obsidian/
+
+# nix-direnv cache
+.direnv/
