@@ -7,7 +7,7 @@ categories: 'Veno 的后端教程'
 comments: true
 ---
 
-> 教程作者： [V3n0](https://v3n0.top)
+> 教程作者： [V3n0](https://v3n0.com)
 
 欢迎阅读 Veno 的后端教程！
 

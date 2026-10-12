@@ -11,7 +11,7 @@ comments: true
 施工中
 :::
 
-欢迎阅读。我是本教程编者[V3n0](https://v3n0.top/)。
+欢迎阅读。我是本教程编者[V3n0](https://v3n0.com/)。
 
 ## 教程的初衷
 

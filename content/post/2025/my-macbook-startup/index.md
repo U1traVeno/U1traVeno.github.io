@@ -145,7 +145,7 @@ macOS 默认使用 zsh。
 
 #### Zim Framework
 
-另见这一篇文章：[我的 Zim Framework 安装和配置](https://v3n0.top/post/2025/zim-makes-my-life-easier/)
+另见这一篇文章：[我的 Zim Framework 安装和配置](https://v3n0.com/post/2025/zim-makes-my-life-easier/)
 
 #### lazyGit
 
