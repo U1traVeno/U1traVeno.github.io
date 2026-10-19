@@ -24,9 +24,10 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       NUMBER: ${{ github.event.issue.number }}
       BRANCH: friend-link/issue-${{ github.event.issue.number }}
-      OUT_DIR: ${{ runner.temp }}
     steps:
       - uses: actions/checkout@v4
+
+      - run: echo "OUT_DIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
 
       - name: Validate and edit blogroll
         id: apply
