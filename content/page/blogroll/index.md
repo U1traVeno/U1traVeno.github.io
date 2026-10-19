@@ -39,6 +39,10 @@ links:
     website: "https://capoo.me"
     image: "https://avatars.githubusercontent.com/u/226017516?v=4"
 
+  - title: "Zera 的小博客"
+    website: "https://zerablog.top/"
+    image: "https://zerablog.top/images/Lili.webp"
+
 menu:
   main:
     weight: -50
