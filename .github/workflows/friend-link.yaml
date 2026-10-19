@@ -1,0 +1,66 @@
+# Turns a friend-link Issue Form submission into a PR. See README "友链".
+name: Friend link
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: friend-link-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  process:
+    if: >-
+      github.event.issue.state == 'open' &&
+      contains(github.event.issue.labels.*.name, 'friend-link')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NUMBER: ${{ github.event.issue.number }}
+      BRANCH: friend-link/issue-${{ github.event.issue.number }}
+      OUT_DIR: ${{ runner.temp }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate and edit blogroll
+        id: apply
+        env:
+          # The issue body is untrusted: pass it through the environment only.
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+        run: python3 scripts/friend_link.py
+
+      - name: Report problems
+        if: steps.apply.outputs.ok == 'false'
+        run: |
+          gh issue comment "$NUMBER" --edit-last --create-if-none \
+            --body-file "$OUT_DIR/comment.md"
+
+      - name: Open or update PR
+        if: steps.apply.outputs.ok == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add content/page/blogroll/index.md
+          git commit -m "$(cat "$OUT_DIR/pr_title.txt")"
+          git push --force origin "$BRANCH"
+
+          if gh pr view "$BRANCH" --json state --jq '.state' 2>/dev/null | grep -q OPEN; then
+            gh pr edit "$BRANCH" --title "$(cat "$OUT_DIR/pr_title.txt")" \
+              --body-file "$OUT_DIR/pr_body.md"
+          else
+            gh pr create --head "$BRANCH" --base "${{ github.event.repository.default_branch }}" \
+              --title "$(cat "$OUT_DIR/pr_title.txt")" --body-file "$OUT_DIR/pr_body.md"
+          fi
+
+          PR_URL="$(gh pr view "$BRANCH" --json url --jq '.url')"
+          gh issue comment "$NUMBER" --edit-last --create-if-none \
+            --body "✅ 检查通过，已生成 PR：$PR_URL。站长确认后会合并，合并后友链将在几分钟内上线。"

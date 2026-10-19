@@ -55,3 +55,12 @@ comments: false
 ---
 
 这里是一些友情链接～
+
+想交换友链？在 GitHub 上[填写申请表](https://github.com/U1traVeno/U1traVeno.github.io/issues/new?template=friend-link.yml)，机器人会自动检查并生成 PR，我确认后就会上线。收录标准和修改、删除的方式见 [README](https://github.com/U1traVeno/U1traVeno.github.io#友链)。
+
+本站信息，方便你复制：
+
+- 名称：Veno's Blog
+- 地址：https://v3n0.com/
+- 头像：https://github.com/U1traVeno.png
+- 简介：Worse is better.

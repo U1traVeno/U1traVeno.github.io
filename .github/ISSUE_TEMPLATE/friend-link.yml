@@ -1,0 +1,65 @@
+name: 友链申请 / Friend link
+description: 新增、修改或删除友链 / Add, update or remove a link
+title: "[友链] "
+labels: ["friend-link"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交后机器人会自动检查并生成 PR，我确认后合并。收录标准见 [README](https://github.com/U1traVeno/U1traVeno.github.io#友链)。
+        After you submit, a bot checks the fields and opens a PR for me to review.
+
+  - type: dropdown
+    id: action
+    attributes:
+      label: 类型 / Type
+      options:
+        - 新增 / Add
+        - 修改 / Update
+        - 删除 / Remove
+    validations:
+      required: true
+
+  - type: input
+    id: title
+    attributes:
+      label: 站点名称 / Site name
+      description: 新增时必填 / Required when adding
+      placeholder: 我的博客 / My Blog
+
+  - type: input
+    id: website
+    attributes:
+      label: 站点地址 / Website
+      description: 必须是 https://。修改或删除时，请填写现有友链的地址，机器人靠它定位条目。
+      placeholder: https://example.com/
+    validations:
+      required: true
+
+  - type: input
+    id: image
+    attributes:
+      label: 头像 URL / Avatar URL
+      description: 新增时必填。https:// 的图片直链，建议方形。GitHub 头像可用 https://github.com/<用户名>.png
+      placeholder: https://example.com/avatar.png
+
+  - type: input
+    id: description
+    attributes:
+      label: 一句话简介 / Description（可选，最多 40 字）
+      placeholder: 一句话介绍你的站点 / A short line about your site
+
+  - type: input
+    id: new_website
+    attributes:
+      label: 新地址 / New website（仅“修改”且域名变更时填）
+      placeholder: https://new.example.com/
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认 / Confirm
+      options:
+        - label: 我已在我的站点添加了本站的友链（新增时必须）/ I have linked back to this site (required when adding)
+        - label: 我的站点符合 README 里的收录标准 / My site meets the criteria in the README
+          required: true

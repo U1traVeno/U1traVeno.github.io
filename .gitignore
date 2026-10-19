@@ -37,3 +37,4 @@ resources/_gen/
 
 # nix-direnv cache
 .direnv/
+__pycache__/
